@@ -6,7 +6,6 @@
 #include <sys/prctl.h>
 #include "process.h"
 
-char *shadowsocks_file;
 char **shadowsocks_args;
 char *plugin_file;
 char *SS_REMOTE_HOST;
@@ -44,7 +43,7 @@ void show_exit_info(exit_info info) { // show info of child process death
     } else if (info.exit_signal != -1) { // abnormal exit
         printf("killed by signal %d.\n", info.exit_signal);
     } else {
-        printf("unknow reason.\n");
+        printf("unknown reason.\n");
     }
 }
 
@@ -52,7 +51,7 @@ exit_info get_exit_info(int status, pid_t pid) { // get why the child process de
     exit_info temp;
     temp.pid = pid;
     temp.exit_code = temp.exit_signal = -1;
-    if (WIFEXITED(status)) { // exit normally (with a exit-code)
+    if (WIFEXITED(status)) { // exit normally (with an exit-code)
         temp.exit_code = WEXITSTATUS(status);
     }
     if (WIFSIGNALED(status)) { // abnormal exit (with a signal)
@@ -153,10 +152,8 @@ void process_exec() { // run shadowsocks main process and plugin (as child proce
 }
 
 void exit_with_child() { // exit and kill his child process
-    if (exiting) {
-        for (;;) {
-            sleep(1); // block
-        }
+    while (exiting) {
+        sleep(1); // block
     }
     exiting = 1;
     if (ss_pid != 0) {

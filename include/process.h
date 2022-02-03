@@ -1,7 +1,6 @@
 #ifndef _PROCESS_H_
 #define _PROCESS_H_
 
-extern char *shadowsocks_file;
 extern char **shadowsocks_args;
 extern char *plugin_file;
 extern char *SS_REMOTE_HOST;

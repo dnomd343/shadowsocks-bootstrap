@@ -23,9 +23,7 @@ void error_exit(char *msg);
 char* int_to_string(int num);
 void pack_shadowsocks_params();
 char* read_file(char *file_name);
-void params_load(char *ss_default);
 void json_decode(char *json_content);
-void args_decode(int argc, char **argv);
 void add_shadowsocks_option(char *option);
 void extra_options_decode(char *extra_opts);
 
@@ -66,7 +64,6 @@ void params_load(char *ss_default) { // load shadowsocks and plugin params
         SS_PLUGIN_OPTIONS = plugin_opts;
     }
     pack_shadowsocks_params();
-    shadowsocks_file = shadowsocks;
     shadowsocks_args = shadowsocks_opts;
     if (plugin == NULL) {
         plugin_file = NULL;
@@ -100,7 +97,7 @@ char* read_file(char *file_name) { // read file content
         error_exit(strcat(strcat(msg, file_name), msg_suffix)); // merge error message
 	}
     fseek(pfile, 0, SEEK_END);
-	int file_length = ftell(pfile); // get file length
+	long file_length = ftell(pfile); // get file length
     char *file_content = (char*)malloc(file_length + 1); // malloc new memory
     if (file_content == NULL) {
         error_exit("no enough memory"); // file too large
@@ -114,7 +111,7 @@ char* read_file(char *file_name) { // read file content
 
 void extra_options_decode(char *extra_opts) { // decode shadowsocks extra options
     int num, i;
-    char *tmp = (char*)calloc(strlen(extra_opts) + 1, 1); // new memery and set as 0x00
+    char *tmp = (char*)calloc(strlen(extra_opts) + 1, 1); // new memory and set as 0x00
     num = i = 0;
     for (;;) {
         if (extra_opts[num] == '\0' || extra_opts[num] == ' ') { // string end or find a space
@@ -285,8 +282,8 @@ void json_decode(char *json_content) { // decode JSON content
                 error_exit("`extra_opts` must be a string.\n");
             }
             extra_options_decode(json->valuestring);
-        } else { // unknow field => ERROR
-            char *msg_prefix = "Unknow JSON field `";
+        } else { // unknown field => ERROR
+            char *msg_prefix = "Unknown JSON field `";
             char *msg_suffix = "`.\n";
             char *msg = (char*)malloc(strlen(msg_prefix) + strlen(json->string) + strlen(msg_suffix) + 1);
             strcpy(msg, msg_prefix);
@@ -300,8 +297,11 @@ void json_decode(char *json_content) { // decode JSON content
 void args_decode(int argc, char **argv) { // decode the input parameters
     args_init();
     int i;
+    int debug_flag = 0;
     for (i = 1; i < argc; ++i) {
-        if (!strcmp(argv[i], "-c")) { // -c => CONFIG_JSON
+        if (!strcmp(argv[i], "--debug")) { // --debug => dump args
+            debug_flag = 1;
+        } else if (!strcmp(argv[i], "-c")) { // -c => CONFIG_JSON
             if (i + 1 == argc) {
                 error_exit("`-c` require a parameter");
             }
@@ -313,7 +313,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (server_addr != NULL) {
                 free(server_addr);
             }
-            server_addr = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            server_addr = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "-p")) { // -p => server_port
             if (i + 1 == argc) {
                 error_exit("`-p` require a parameter");
@@ -321,7 +322,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (server_port != NULL) {
                 free(server_port);
             }
-            server_port = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            server_port = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "-b")) { // -b => client_addr
             if (i + 1 == argc) {
                 error_exit("`-b` require a parameter");
@@ -329,7 +331,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (client_addr != NULL) {
                 free(client_addr);
             }
-            client_addr = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            client_addr = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "-l")) { // -l => client_port
             if (i + 1 == argc) {
                 error_exit("`-l` require a parameter");
@@ -337,7 +340,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (client_port != NULL) {
                 free(client_port);
             }
-            client_port = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            client_port = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "-k")) { // -k => password
             if (i + 1 == argc) {
                 error_exit("`-k` require a parameter");
@@ -345,7 +349,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (password != NULL) {
                 free(password);
             }
-            password = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            password = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "-m")) { // -m => method
             if (i + 1 == argc) {
                 error_exit("`-m` require a parameter");
@@ -353,7 +358,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (method != NULL) {
                 free(method);
             }
-            method = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            method = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "-t")) { // -t => timeout
             if (i + 1 == argc) {
                 error_exit("`-t` require a parameter");
@@ -361,7 +367,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (timeout != NULL) {
                 free(timeout);
             }
-            timeout = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            timeout = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "--fast-open")) { // --fast-open
             fastopen = 1;
         } else if (!strcmp(argv[i], "--plugin")) { // --plugin => plugin
@@ -371,7 +378,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (plugin != NULL) {
                 free(plugin);
             }
-            plugin = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            plugin = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "--plugin-opts")) { // --plugin-opts => plugin_opts
             if (i + 1 == argc) {
                 error_exit("`--plugin-opts` require a parameter");
@@ -379,7 +387,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (plugin_opts != NULL) {
                 free(plugin_opts);
             }
-            plugin_opts = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
+            ++i;
+            plugin_opts = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
         } else if (!strcmp(argv[i], "--shadowsocks")) { // --shadowsocks => shadowsocks
             if (i + 1 == argc) {
                 error_exit("`--shadowsocks` require a parameter");
@@ -387,10 +396,14 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             if (shadowsocks != NULL) {
                 free(shadowsocks);
             }
-            shadowsocks = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[++i]);
-        } else { // unknow option => archive
-            add_shadowsocks_option(argv[i]); // archive unknow options
+            ++i;
+            shadowsocks = strcpy((char*)malloc(strlen(argv[i]) + 1), argv[i]);
+        } else { // unknown option => archive
+            add_shadowsocks_option(argv[i]); // archive unknown options
         }
+    }
+    if (debug_flag) { // show args for debug
+        args_dump();
     }
 }
 

@@ -30,7 +30,7 @@ ss-bootstrap-server\n\
 ";
 
 int main(int argc, char *argv[]) {
-    int i = 0;
+    int i;
     for (i = 0; i < argc; ++i) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
             printf("%s", help_msg); // show help message
