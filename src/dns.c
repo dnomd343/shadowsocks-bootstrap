@@ -8,7 +8,7 @@
 #include "dns.h"
 
 char** init_dns_result();
-void add_dns_result(char **dns_result, char *str);
+char** add_dns_result(char **dns_result, char *str);
 void free_dns_result(char **dns_result);
 char** ipv4_dns_resolve(char *domain);
 char** ipv6_dns_resolve(char *domain);
@@ -19,12 +19,13 @@ char** init_dns_result() { // 初始化DNS解析存储结构
     return dns_result;
 }
 
-void add_dns_result(char **dns_result, char *str) { // 添加DNS解析记录
+char** add_dns_result(char **dns_result, char *str) { // 添加DNS解析记录
     int num = 0;
     while(dns_result[num++] != NULL); // 获取原存储个数
     dns_result = (char**)realloc(dns_result, sizeof(char**) * (num + 1));
     dns_result[num - 1] = strcpy((char*)malloc(strlen(str) + 1), str);
     dns_result[num] = NULL; // 结束标志
+    return dns_result;
 }
 
 void free_dns_result(char **dns_result) { // 释放DNS解析结果
@@ -50,7 +51,7 @@ char** ipv4_dns_resolve(char *domain) { // DNS解析IPv4地址
     for (p = answer; p != NULL; p = p->ai_next) { // 遍历解析结果
         ipv4_addr = (struct sockaddr_in*)(p->ai_addr); // 获取IPv4地址
         inet_ntop(AF_INET, &ipv4_addr->sin_addr, ip_str, sizeof(ip_str)); // 转化为字符串形式
-        add_dns_result(result, ip_str);
+        result = add_dns_result(result, ip_str);
     }
     freeaddrinfo(answer); // 释放解析结果
     return result;
@@ -72,7 +73,7 @@ char** ipv6_dns_resolve(char *domain) { // DNS解析IPv6地址
     for (p = answer; p != NULL; p = p->ai_next) { // 遍历解析结果
         ipv6_addr = (struct sockaddr_in6*)(p->ai_addr); // 获取IPv6地址
         inet_ntop(AF_INET6, &ipv6_addr->sin6_addr, ip_str, sizeof(ip_str)); // 转化为字符串形式
-        add_dns_result(result, ip_str);
+        result = add_dns_result(result, ip_str);
     }
     freeaddrinfo(answer); // 释放解析结果
     return result;
