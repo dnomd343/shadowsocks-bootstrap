@@ -13,6 +13,20 @@
 
 int proxy_exit;
 
+int get_random_num(int range_start, int range_end);
+int check_port_available(unsigned int port, int is_udp, int is_ipv6);
+int is_ipv4_addr(char *address);
+int is_ipv6_addr(char *address);
+int create_ipv4_udp_sock(char *address, int port);
+int create_ipv6_udp_sock(char *address, int port);
+long ipv4_receive(int fd, char *buffer, int buffer_size, int timeout, struct sockaddr_in sa);
+long ipv6_receive(int fd, char *buffer, int buffer_size, int timeout, struct sockaddr_in6 sa);
+long ipv4_send_and_receive(char *ipv4_server_ip, int ipv4_server_port, char *send_buffer, long send_len, char *recv_buffer);
+long ipv6_send_and_receive(char *ipv6_server_ip, int ipv6_server_port, char *send_buffer, long send_len, char *recv_buffer);
+long send_and_receive(char *server_ip, int server_port, char *send_buffer, long send_len, char *recv_buffer);
+void ipv4_proxy(void *ipv4_info);
+void ipv6_proxy(void *ipv6_info);
+
 typedef struct ipv4_proxy_info {
     char *server_ip;
     int server_port;
@@ -105,9 +119,23 @@ int get_available_port(unsigned short range_start, unsigned short range_end) { /
     }
 }
 
+int is_ipv4_addr(char *address) { // 判断是否为IPv4地址
+    if (inet_addr(address) == -1) {
+        return 0;
+    }
+    return 1;
+}
+
 int is_ipv6_addr(char *address) { // 判断是否为IPv6地址
-    struct sockaddr_in6 temp;
-    if (!inet_aton(address, (struct in_addr*)&temp.sin6_addr)) { // IPv6 address
+    char buf[sizeof(struct in6_addr)];
+    if (inet_pton(AF_INET6, address, buf) <= 0) {
+        return 0;
+    }
+    return 1;
+}
+
+int is_ip_addr(char *address) { // 判断是否为IP地址
+    if (is_ipv4_addr(address) || is_ipv6_addr(address)) {
         return 1;
     }
     return 0;
@@ -228,7 +256,7 @@ void ipv4_proxy(void *ipv4_info) { // 代理IPv4客户端
     char *recv_buffer = (char*)malloc(BUFFER_SIZE); // 申请接收缓冲区内存
     long recv_len = send_and_receive(info->server_ip, info->server_port, info->buffer, info->len, recv_buffer); // 服务端交互
     if (recv_len < 0) { // 服务端超时
-        printf("[Shadowsocks Bootstrap] Server return timeout\n");
+        printf("[Shadowsocks Bootstrap] UDP Proxy: server return timeout\n");
     } else {
         if (sendto(info->ipv4_client_fd, recv_buffer, recv_len, 0, (struct sockaddr*)&(info->ipv4_client_addr), sizeof(info->ipv4_client_addr)) < 0) { // 服务端数据返回给客户端
             perror("[Shadowsocks Bootstrap] IPv4 UDP return failed");

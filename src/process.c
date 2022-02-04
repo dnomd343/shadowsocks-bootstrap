@@ -6,6 +6,7 @@
 #include <sys/prctl.h>
 #include "network.h"
 #include "process.h"
+#include "dns.h"
 
 char **shadowsocks_args;
 char *plugin_file;
@@ -201,10 +202,26 @@ void start_bootstrap(char *ss_type) { // start shadowsocks and plugin (optional)
     process_exec(); // exec child process
     usleep(500 * 1000); // wait 500ms for plugin start
     if (plugin_file != NULL) { // start udp proxy when using plugin
-        if (!strcmp(ss_type, "sslocal")) { // local mode
-            proxy(SS_REMOTE_HOST, atoi(SS_REMOTE_PORT), SS_LOCAL_HOST, atoi(SS_LOCAL_PORT));
-        } else { // server mode
-            proxy(SS_LOCAL_HOST, atoi(SS_LOCAL_PORT), SS_REMOTE_HOST, atoi(SS_REMOTE_PORT));
+        char *remote_ip;
+        if (is_ip_addr(SS_REMOTE_HOST)) { // remote_host -> ip address
+            remote_ip = SS_REMOTE_HOST;
+        } else { // remote_host -> domain
+            printf("[Shadowsocks Bootstrap] DNS Resolve: %s\n", SS_REMOTE_HOST);
+            remote_ip = dns_resolve(SS_REMOTE_HOST); // dns resolve
+            if (remote_ip == NULL) { // no result
+                printf("[Shadowsocks Bootstrap] DNS record not found.\n");
+            } else { // dns resolve success
+                printf("[Shadowsocks Bootstrap] %s => %s\n", SS_REMOTE_HOST, remote_ip);
+            }
+        }
+        if (remote_ip == NULL) { // resolve error
+            printf("[Shadowsocks Bootstrap] Skip UDP Proxy.\n");
+        } else { // udp proxy
+            if (!strcmp(ss_type, "sslocal")) { // local mode
+                proxy(remote_ip, atoi(SS_REMOTE_PORT), SS_LOCAL_HOST, atoi(SS_LOCAL_PORT));
+            } else { // server mode
+                proxy(SS_LOCAL_HOST, atoi(SS_LOCAL_PORT), remote_ip, atoi(SS_REMOTE_PORT));
+            }
         }
     }
     g_main_loop_run(main_loop); // into main loop for wait
