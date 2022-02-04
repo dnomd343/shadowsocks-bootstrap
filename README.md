@@ -58,7 +58,7 @@ shell> ss-bootstrap-local -s 127.0.0.1 -p 12345 -b 0.0.0.0 -l 1080 -k dnomd343 -
 
 You need to install `gcc` , `make` and `cmake` at first, and also need the `glib2.0` development environment.
 
-Example on Alpine:
+Example on `Alpine`:
 
 ```bash
 apk add build-base make cmake git glib-dev
@@ -67,6 +67,31 @@ cd shadowsocks-bootstrap/
 mkdir build && cd build/
 cmake .. && make
 mv ../bin/* /usr/bin/
+```
+
+Example on `Ubuntu`:
+
+```bash
+sudo apt update
+sudo apt install build-essential cmake git libglib2.0-dev
+git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
+cd shadowsocks-bootstrap/
+mkdir build && cd build/
+cmake .. && make
+sudo mv ../bin/* /usr/local/bin/
+```
+
+Example on `CentOS`:
+
+```bash
+sudo yum update
+sudo yum groupinstall "Development Tools"
+sudo yum install cmake libgnomeui-devel
+git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
+cd shadowsocks-bootstrap/
+mkdir build && cd build/
+cmake .. && make
+sudo mv ../bin/* /usr/local/bin/
 ```
 
 ### License
