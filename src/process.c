@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
+#include "network.h"
 #include "process.h"
 
 char **shadowsocks_args;
@@ -156,6 +157,7 @@ void exit_with_child() { // exit and kill his child process
         sleep(1); // block
     }
     exiting = 1;
+    proxy_exit = 1;
     if (ss_pid != 0) {
         kill(ss_pid, SIGKILL);
         printf("[Shadowsocks Bootstrap] kill shadowsocks process.\n");
@@ -190,13 +192,21 @@ void show_params() { // show shadowsocks and plugin params
     printf("[Shadowsocks Bootstrap]   SS_PLUGIN_OPTIONS -> %s\n", SS_PLUGIN_OPTIONS);
 }
 
-void start_bootstrap() { // start shadowsocks and plugin (optional)
+void start_bootstrap(char *ss_type) { // start shadowsocks and plugin (optional)
     show_params();
     main_loop = g_main_loop_new(NULL, FALSE);
     signal(SIGINT, exit_with_child); // catch Ctrl + C (2)
     signal(SIGTERM, exit_with_child); // catch exit signal (15)
     signal(SIGCHLD, get_sub_exit); // callback when child process die
     process_exec(); // exec child process
+    usleep(500 * 1000); // wait 500ms for plugin start
+    if (plugin_file != NULL) { // start udp proxy when using plugin
+        if (!strcmp(ss_type, "sslocal")) { // local mode
+            proxy(SS_REMOTE_HOST, atoi(SS_REMOTE_PORT), SS_LOCAL_HOST, atoi(SS_LOCAL_PORT));
+        } else { // server mode
+            proxy(SS_LOCAL_HOST, atoi(SS_LOCAL_PORT), SS_REMOTE_HOST, atoi(SS_REMOTE_PORT));
+        }
+    }
     g_main_loop_run(main_loop); // into main loop for wait
     exit_with_child();
 }

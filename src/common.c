@@ -39,7 +39,7 @@ char* int_to_string(int num) { // int -> string
     }
     int count = 0;
     int temp = num;
-    while(temp != 0) { // check the number of digits
+    while (temp != 0) { // check the number of digits
         temp /= 10;
         ++count;
     }

@@ -13,7 +13,7 @@ list(REMOVE_ITEM SRC ${PROJECT_SOURCE_DIR}/src/local.c)
 list(REMOVE_ITEM SRC ${PROJECT_SOURCE_DIR}/src/server.c)
 
 add_executable(ss-bootstrap-local local.c ${SRC})
-target_link_libraries(ss-bootstrap-local glib-2.0)
+target_link_libraries(ss-bootstrap-local glib-2.0 pthread)
 
 add_executable(ss-bootstrap-server server.c ${SRC})
-target_link_libraries(ss-bootstrap-server glib-2.0)
+target_link_libraries(ss-bootstrap-server glib-2.0 pthread)

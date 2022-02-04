@@ -3,6 +3,8 @@
 #include "common.h"
 #include "process.h"
 
+#include "network.h"
+
 #define SHADOWSOCKS_DEFAULT "ssserver"
 
 char *help_msg =
@@ -39,6 +41,6 @@ int main(int argc, char *argv[]) {
     }
     args_decode(argc, argv);
     params_load(SHADOWSOCKS_DEFAULT); // default file name
-    start_bootstrap();
+    start_bootstrap(SHADOWSOCKS_DEFAULT); // local or server mode
     return 0;
 }
