@@ -81,8 +81,7 @@ char** ipv6_dns_resolve(char *domain) { // DNS解析IPv6地址
 
 char* dns_resolve(char *domain) { // DNS解析 返回首个IP地址 IPv4优先
     int num = 0;
-    char **result = init_dns_result();
-    result = ipv4_dns_resolve(domain); // IPv4解析
+    char **result = ipv4_dns_resolve(domain); // IPv4解析
     while(result[num++] != NULL); // num - 1 为IPv4地址数
     if (num - 1 != 0) { // 存在IPv4解析
         char *tmp = strcpy((char*)malloc(strlen(result[0]) + 1), result[0]);

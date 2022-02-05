@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <glib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -217,9 +219,9 @@ void start_bootstrap(char *ss_type, int is_udp_proxy) { // start shadowsocks and
             printf("[Shadowsocks Bootstrap] Skip UDP Proxy.\n");
         } else { // udp proxy
             if (!strcmp(ss_type, "sslocal")) { // local mode
-                proxy(remote_ip, atoi(SS_REMOTE_PORT), SS_LOCAL_HOST, atoi(SS_LOCAL_PORT));
+                proxy(remote_ip, atoi(SS_REMOTE_PORT), SS_LOCAL_HOST, atoi(SS_LOCAL_PORT)); // NOLINT
             } else { // server mode
-                proxy(SS_LOCAL_HOST, atoi(SS_LOCAL_PORT), remote_ip, atoi(SS_REMOTE_PORT));
+                proxy(SS_LOCAL_HOST, atoi(SS_LOCAL_PORT), remote_ip, atoi(SS_REMOTE_PORT)); // NOLINT
             }
         }
     } else {

@@ -49,7 +49,7 @@ int get_random_num(int range_start, int range_end) { // create a random number i
     struct timeval tp;
     gettimeofday(&tp, NULL);
     srand(tp.tv_usec);
-    return range_start + (rand() % (range_end - range_start + 1));
+    return range_start + (rand() % (range_end - range_start + 1)); // NOLINT (randomness is enough for us)
 }
 
 int check_port_available(unsigned int port, int is_udp, int is_ipv6) { // test a port is available or not
@@ -291,8 +291,7 @@ void proxy(char *server_ip, int server_port, char *listen_ip, int listen_port) {
     pthread_t tid;
     long recv_len;
     char recv_buffer[BUFFER_SIZE]; // 接收缓冲区
-    int ipv4_client_fd = -1;
-    int ipv6_client_fd = -1;
+    int ipv4_client_fd, ipv6_client_fd;
     struct sockaddr_in ipv4_client_addr;
     struct sockaddr_in6 ipv6_client_addr;
     socklen_t ipv4_client_addr_len = sizeof(ipv4_client_addr);
