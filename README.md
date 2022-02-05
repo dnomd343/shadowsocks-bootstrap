@@ -25,6 +25,7 @@ A simple program to make the original shadowsocks support SIP003 plugins.
 --plugin <name>              Enable SIP003 plugin.
 --plugin-opts <options>      Set SIP003 plugin options.
 --shadowsocks <shadowsocks>  Set shadowsocks local or server program.
+--no-udp                     Do not use UDP proxy.
 -h, --help                   Print this message.
 ```
 
@@ -40,6 +41,7 @@ You can also run via a JSON config file:
     "timeout": 300,
     "method": "aes-256-cfb",
     "fast_open": false,
+    "no_udp": false,
     "plugin": "...",
     "plugin_opts": "...",
     "shadowsocks": "...",
@@ -58,9 +60,12 @@ shell> ss-bootstrap-local -s 127.0.0.1 -p 12345 -b 0.0.0.0 -l 1080 -k dnomd343 -
 
 You need to install `gcc` , `make` and `cmake` at first, and also need the `glib2.0` development environment.
 
-Example on `Alpine`:
+<details>
+
+<summary>Examples</summary>
 
 ```bash
+# Alpine
 apk add build-base make cmake git glib-dev
 git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
 cd shadowsocks-bootstrap/
@@ -69,9 +74,8 @@ cmake .. && make
 mv ../bin/* /usr/bin/
 ```
 
-Example on `Ubuntu`:
-
 ```bash
+# Ubuntu
 sudo apt update
 sudo apt install build-essential cmake git libglib2.0-dev
 git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
@@ -81,9 +85,8 @@ cmake .. && make
 sudo mv ../bin/* /usr/local/bin/
 ```
 
-Example on `CentOS`:
-
 ```bash
+# CentOS
 sudo yum update
 sudo yum groupinstall "Development Tools"
 sudo yum install cmake libgnomeui-devel
@@ -93,6 +96,8 @@ mkdir build && cd build/
 cmake .. && make
 sudo mv ../bin/* /usr/local/bin/
 ```
+
+</details>
 
 ### License
 
