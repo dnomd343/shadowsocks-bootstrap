@@ -64,6 +64,8 @@ You need to install `gcc` , `make` and `cmake` at first, and also need the `glib
 
 <summary>Examples</summary>
 
+<br>
+
 ```bash
 # Alpine
 apk add build-base make cmake git glib-dev
