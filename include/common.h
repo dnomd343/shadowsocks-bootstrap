@@ -4,6 +4,7 @@
 #define RANDOM_PORT_START 41952
 #define RANDOM_PORT_END   65535
 
+extern int is_udp_proxy;
 extern char *server_addr, *client_addr;
 extern char *server_port, *client_port;
 extern char *password;

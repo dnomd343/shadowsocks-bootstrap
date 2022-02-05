@@ -1,9 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "common.h"
 #include "process.h"
-
-#include "network.h"
 
 #define SHADOWSOCKS_DEFAULT "ssserver"
 
@@ -27,20 +26,28 @@ ss-bootstrap-server\n\
     --plugin <name>            Enable SIP003 plugin.\n\
     --plugin-opts <options>    Set SIP003 plugin options.\n\
     --shadowsocks <ssservre>   Set shadowsocks server program.\n\
+    --no-udp                   Do not use UDP proxy.\n\
     -h, --help                 Print this message.\n\
 \n\
 ";
 
+void show_help() { // show help message
+    printf("%s", help_msg);
+    exit(0); // exit normally
+}
+
 int main(int argc, char *argv[]) {
     int i;
+    if (argc <= 1) {
+        show_help();
+    }
     for (i = 0; i < argc; ++i) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
-            printf("%s", help_msg); // show help message
-            return 0;
+            show_help();
         }
     }
     args_decode(argc, argv);
     params_load(SHADOWSOCKS_DEFAULT); // default file name
-    start_bootstrap(SHADOWSOCKS_DEFAULT); // local or server mode
+    start_bootstrap(SHADOWSOCKS_DEFAULT, is_udp_proxy); // local or server mode
     return 0;
 }

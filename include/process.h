@@ -9,6 +9,6 @@ extern char *SS_LOCAL_HOST;
 extern char *SS_LOCAL_PORT;
 extern char *SS_PLUGIN_OPTIONS;
 
-void start_bootstrap(char *ss_type);
+void start_bootstrap(char *ss_type, int is_udp_proxy);
 
 #endif

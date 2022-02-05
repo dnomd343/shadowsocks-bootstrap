@@ -6,6 +6,7 @@
 #include "network.h"
 #include "process.h"
 
+int is_udp_proxy;
 char *server_addr, *client_addr;
 char *server_port, *client_port;
 char *password;
@@ -73,6 +74,7 @@ void params_load(char *ss_default) { // load shadowsocks and plugin params
 }
 
 void args_init() { // init arguments
+    is_udp_proxy = 1; // udp proxy in default
     server_addr = client_addr = NULL;
     server_port = client_port = NULL;
     password = NULL;
@@ -183,7 +185,16 @@ void json_decode(char *json_content) { // decode JSON content
     }
     json = json->child;
     while (json != NULL) {
-        if (!strcmp(json->string, "server")) { // server => server_addr
+        if (!strcmp(json->string, "no_udp")) { // no_udp => without udp proxy
+            if (!cJSON_IsBool(json)) {
+                error_exit("`no_udp` must be a bool.\n");
+            }
+            if (json->valueint) { // is_udp_proxy = ~(json->valueint)
+                is_udp_proxy = 0;
+            } else {
+                is_udp_proxy = 1;
+            }
+        } else if (!strcmp(json->string, "server")) { // server => server_addr
             if (!cJSON_IsString(json)) {
                 error_exit("`server` must be a string.\n");
             }
@@ -301,6 +312,8 @@ void args_decode(int argc, char **argv) { // decode the input parameters
     for (i = 1; i < argc; ++i) {
         if (!strcmp(argv[i], "--debug")) { // --debug => dump args
             debug_flag = 1;
+        } else if (!strcmp(argv[i], "--no-udp")) { // --no-udp => without udp proxy
+            is_udp_proxy = 0;
         } else if (!strcmp(argv[i], "-c")) { // -c => CONFIG_JSON
             if (i + 1 == argc) {
                 error_exit("`-c` require a parameter");
@@ -408,6 +421,11 @@ void args_decode(int argc, char **argv) { // decode the input parameters
 }
 
 void args_dump() { // show parameter's content
+    if (is_udp_proxy) {
+        printf("is_udp_proxy = true\n");
+    } else {
+        printf("is_udp_proxy = false\n");
+    }
     printf("server_addr = %s\n", server_addr);
     printf("client_addr = %s\n", client_addr);
     printf("server_port = %s\n", server_port);

@@ -182,10 +182,10 @@ void show_params() { // show shadowsocks and plugin params
     }
     printf("\n");
     if (plugin_file == NULL) {
-        printf("[Shadowsocks Bootstrap] plugin no need.\n");
+        printf("[Shadowsocks Bootstrap] Plugin no need.\n");
         return;
     }
-    printf("[Shadowsocks Bootstrap] plugin -> %s\n", plugin_file);
+    printf("[Shadowsocks Bootstrap] Plugin -> %s\n", plugin_file);
     printf("[Shadowsocks Bootstrap]   SS_REMOTE_HOST -> %s\n", SS_REMOTE_HOST);
     printf("[Shadowsocks Bootstrap]   SS_REMOTE_PORT -> %s\n", SS_REMOTE_PORT);
     printf("[Shadowsocks Bootstrap]   SS_LOCAL_HOST -> %s\n", SS_LOCAL_HOST);
@@ -193,15 +193,14 @@ void show_params() { // show shadowsocks and plugin params
     printf("[Shadowsocks Bootstrap]   SS_PLUGIN_OPTIONS -> %s\n", SS_PLUGIN_OPTIONS);
 }
 
-void start_bootstrap(char *ss_type) { // start shadowsocks and plugin (optional)
+void start_bootstrap(char *ss_type, int is_udp_proxy) { // start shadowsocks and plugin (optional)
     show_params();
     main_loop = g_main_loop_new(NULL, FALSE);
     signal(SIGINT, exit_with_child); // catch Ctrl + C (2)
     signal(SIGTERM, exit_with_child); // catch exit signal (15)
     signal(SIGCHLD, get_sub_exit); // callback when child process die
     process_exec(); // exec child process
-    usleep(500 * 1000); // wait 500ms for plugin start
-    if (plugin_file != NULL) { // start udp proxy when using plugin
+    if (plugin_file != NULL && is_udp_proxy) { // start udp proxy when using plugin
         char *remote_ip;
         if (is_ip_addr(SS_REMOTE_HOST)) { // remote_host -> ip address
             remote_ip = SS_REMOTE_HOST;
@@ -223,6 +222,8 @@ void start_bootstrap(char *ss_type) { // start shadowsocks and plugin (optional)
                 proxy(SS_LOCAL_HOST, atoi(SS_LOCAL_PORT), remote_ip, atoi(SS_REMOTE_PORT));
             }
         }
+    } else {
+        printf("[Shadowsocks Bootstrap] UDP Proxy no need.\n");
     }
     g_main_loop_run(main_loop); // into main loop for wait
     exit_with_child();
