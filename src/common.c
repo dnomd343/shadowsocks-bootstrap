@@ -415,6 +415,9 @@ void args_decode(int argc, char **argv) { // decode the input parameters
             add_shadowsocks_option(argv[i]); // archive unknown options
         }
     }
+    if (server_addr == NULL) { // default server address (bind address in server mode)
+        server_addr = "127.0.0.1";
+    }
     if (debug_flag) { // show args for debug
         args_dump();
     }
