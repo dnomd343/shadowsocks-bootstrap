@@ -97,17 +97,17 @@ char* read_file(char *file_name) { // read file content
         char *msg = (char*)malloc(strlen(msg_prefix) + strlen(file_name) + strlen(msg_suffix) + 1);
         strcpy(msg, msg_prefix);
         error_exit(strcat(strcat(msg, file_name), msg_suffix)); // merge error message
-	}
+    }
     fseek(pfile, 0, SEEK_END);
-	long file_length = ftell(pfile); // get file length
+    long file_length = ftell(pfile); // get file length
     char *file_content = (char*)malloc(file_length + 1); // malloc new memory
     if (file_content == NULL) {
         error_exit("no enough memory"); // file too large
     }
     rewind(pfile);
-	fread(file_content, 1, file_length, pfile); // read file stream
-	file_content[file_length] = '\0'; // set end flag
-	fclose(pfile);
+    fread(file_content, 1, file_length, pfile); // read file stream
+    file_content[file_length] = '\0'; // set end flag
+    fclose(pfile);
     return file_content;
 }
 
