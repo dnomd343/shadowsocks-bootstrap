@@ -3,6 +3,7 @@
 #include <string.h>
 #include "common.h"
 #include "process.h"
+#include "log.h"
 
 #define SHADOWSOCKS_DEFAULT "sslocal"
 
@@ -38,16 +39,23 @@ void show_help() { // show help message
 
 int main(int argc, char *argv[]) {
     int i;
-    if (argc <= 1) {
-        show_help();
-    }
-    for (i = 0; i < argc; ++i) {
-        if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
-            show_help();
-        }
-    }
-    args_decode(argc, argv);
-    params_load(SHADOWSOCKS_DEFAULT); // default file name
-    start_bootstrap(SHADOWSOCKS_DEFAULT, is_udp_proxy); // local or server mode
+
+    log_debug("%s", "shadowsocks-bootstrap log level debug");
+    log_info("%s", "shadowsocks-bootstrap log level info");
+    log_warn("%s", "shadowsocks-bootstrap log level warn");
+    log_error("%s", "shadowsocks-bootstrap log level error");
+    log_fatal("%s", "shadowsocks-bootstrap log level fatal");
+
+//    if (argc <= 1) {
+//        show_help();
+//    }
+//    for (i = 0; i < argc; ++i) {
+//        if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
+//            show_help();
+//        }
+//    }
+//    args_decode(argc, argv);
+//    params_load(SHADOWSOCKS_DEFAULT); // default file name
+//    start_bootstrap(SHADOWSOCKS_DEFAULT, is_udp_proxy); // local or server mode
     return 0;
 }
