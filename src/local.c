@@ -10,8 +10,9 @@ int main(int argc, char *argv[]) {
     is_show_help(argc, argv, local_help_msg);
     log_info("Shadowsocks bootstrap local (%s)", VERSION);
 
-    args_decode(argc, argv);
-    params_load("sslocal"); // default file name
-    start_bootstrap("sslocal", is_udp_proxy); // local or server mode
+    bootstrap_info info;
+    args_decode(argc, argv, &info);
+//    params_load("sslocal"); // default file name
+//    start_bootstrap("sslocal", is_udp_proxy); // local or server mode
     return 0;
 }

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "log.h"
 
 int log_level = LOG_DEBUG; // default log level
@@ -34,4 +35,8 @@ void log_printf(int level, const char *fmt, ...) {
     fprintf(stderr, "\n"); // add LF after line
     fflush(stderr);
     va_end(ap);
+
+    if (level == LOG_FATAL) {
+        exit(1);
+    }
 }
