@@ -1,7 +1,9 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
-#include <glib.h>
+//#include <glib.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -22,6 +24,7 @@ char **plugin_env;
 char *plugin_arg[] = { NULL, NULL };
 
 int exiting = 0;
+int exit_complete = 0;
 
 typedef struct exit_info {
     int pid;
@@ -29,7 +32,7 @@ typedef struct exit_info {
     int exit_signal;
 } exit_info;
 
-GMainLoop* main_loop;
+//GMainLoop* main_loop;
 pid_t ss_pid = 0, plugin_pid = 0;
 
 void show_params();
@@ -96,7 +99,8 @@ void get_sub_exit() { // catch child process die
             exit_with_child();
         }
     }
-    g_main_loop_quit(main_loop); // exit main loop
+//    g_main_loop_quit(main_loop); // exit main loop
+    exit_complete = 1;
 }
 
 void plugin_env_load() { // load plugin's environment variable
@@ -197,7 +201,7 @@ void show_params() { // show shadowsocks and plugin params
 
 void start_bootstrap(char *ss_type, int is_udp_proxy) { // start shadowsocks and plugin (optional)
     show_params();
-    main_loop = g_main_loop_new(NULL, FALSE);
+//    main_loop = g_main_loop_new(NULL, FALSE);
     signal(SIGINT, exit_with_child); // catch Ctrl + C (2)
     signal(SIGTERM, exit_with_child); // catch exit signal (15)
     signal(SIGCHLD, get_sub_exit); // callback when child process die
@@ -227,6 +231,12 @@ void start_bootstrap(char *ss_type, int is_udp_proxy) { // start shadowsocks and
     } else {
         printf("[Shadowsocks Bootstrap] UDP Proxy no need.\n");
     }
-    g_main_loop_run(main_loop); // into main loop for wait
+
+    while (!exit_complete) {
+        pause();
+        printf("!!! get signal !!!\n");
+    }
+
+//    g_main_loop_run(main_loop); // into main loop for wait
     exit_with_child();
 }
