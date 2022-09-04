@@ -26,6 +26,7 @@ A simple program to make the original shadowsocks support SIP003 plugins.
 --plugin-opts <options>      Set SIP003 plugin options.
 --shadowsocks <shadowsocks>  Set shadowsocks local or server program.
 --no-udp                     Do not use UDP proxy.
+--debug                      Enable debug mode.
 -h, --help                   Print this message.
 ```
 
@@ -58,7 +59,7 @@ shell> ss-bootstrap-local -s 127.0.0.1 -p 12345 -b 0.0.0.0 -l 1080 -k dnomd343 -
 
 ### Compile
 
-You need to install `gcc` , `make` and `cmake` at first, and also need the `glib2.0` development environment.
+> You need to install `gcc` , `make` and `cmake` at first.
 
 <details>
 
@@ -68,7 +69,7 @@ You need to install `gcc` , `make` and `cmake` at first, and also need the `glib
 
 ```bash
 # Alpine
-apk add build-base make cmake git glib-dev
+apk add build-base make cmake git
 git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
 cd shadowsocks-bootstrap/
 mkdir build && cd build/
@@ -79,7 +80,7 @@ mv ../bin/* /usr/bin/
 ```bash
 # Ubuntu
 sudo apt update
-sudo apt install build-essential cmake git libglib2.0-dev
+sudo apt install build-essential cmake git
 git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
 cd shadowsocks-bootstrap/
 mkdir build && cd build/
@@ -91,7 +92,7 @@ sudo mv ../bin/* /usr/local/bin/
 # CentOS
 sudo yum update
 sudo yum groupinstall "Development Tools"
-sudo yum install cmake libgnomeui-devel
+sudo yum install cmake
 git clone https://github.com/dnomd343/shadowsocks-bootstrap.git
 cd shadowsocks-bootstrap/
 mkdir build && cd build/
