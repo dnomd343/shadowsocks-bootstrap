@@ -4,14 +4,14 @@
 #include "common.h"
 #include "process.h"
 #include "help.h"
-#include "log.h"
+#include "logger.h"
 
 int main(int argc, char *argv[]) {
     is_show_help(argc, argv, server_help_msg);
     log_info("Shadowsocks bootstrap server (%s)", VERSION);
 
-    bootstrap_info info;
-    args_decode(argc, argv, &info);
+//    bootstrap_info info;
+//    args_decode(argc, argv, &info);
 //    params_load("ssserver"); // default file name
 //    start_bootstrap("ssserver", is_udp_proxy); // local or server mode
     return 0;

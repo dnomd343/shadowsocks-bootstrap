@@ -1,23 +1,13 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#define VERSION "0.9.1"
+
 #define RANDOM_PORT_START 41952
 #define RANDOM_PORT_END   65535
 
-//extern int is_udp_proxy;
-//extern char *server_addr, *client_addr;
-//extern char *server_port, *client_port;
-//extern char *password;
-//extern char *method;
-//extern char *timeout;
-//extern int fastopen;
-//extern char *plugin;
-//extern char *plugin_opts;
-//extern char *shadowsocks;
-//extern char **shadowsocks_opts;
-
 typedef struct {
-    int is_debug, is_udp_proxy;
+    int is_udp_proxy;
     char *server_addr, *client_addr;
     char *server_port, *client_port;
     char *password;
@@ -30,6 +20,9 @@ typedef struct {
     char **shadowsocks_opts;
 } bootstrap_info;
 
+char* int_to_string(int num);
+char* new_string(char *str);
+char* read_file(char *file_name);
 void params_load(char *ss_default, bootstrap_info *info);
 void args_decode(int argc, char **argv, bootstrap_info *info);
 

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "log.h"
+#include "logger.h"
 
 int log_level = LOG_DEBUG; // default log level
 
