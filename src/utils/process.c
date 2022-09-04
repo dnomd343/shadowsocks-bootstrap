@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <string.h>
-
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
@@ -21,16 +19,14 @@ pid_t ss_pid = 0, plugin_pid = 0;
 int exiting = 0; // sub process exiting
 int exited = 0; // all sub process exited
 
-//void process_exec();
-//void get_sub_exit();
-//void exit_with_child();
-//void plugin_env_load();
-//void show_exit_info(exit_info info);
-//exit_info get_exit_info(int status, pid_t pid);
-
 void error_exit();
 void normal_exit();
+void get_sub_exit();
 void kill_sub_process();
+void show_exit_info(exit_info info, char *prefix);
+exit_info get_exit_info(int status, pid_t pid);
+char** load_plugin_env(sip003 *service);
+void process_exec(sip003 *service);
 
 void normal_exit() { // exit normally
     kill_sub_process();
@@ -97,7 +93,7 @@ void get_sub_exit() { // catch child process die
     if (ss_pid != 0) {
         ss_ret = waitpid(ss_pid, &ss_status, WNOHANG); // non-blocking
         if (ss_ret == -1) {
-            perror("[Shadowsocks Bootstrap] shadowsocks waitpid error");
+            log_perror("Shadowsocks waitpid error");
             error_exit();
         } else if (ss_ret) { // ss exit
             sub_exit_info = get_exit_info(ss_status, ss_pid);
@@ -108,7 +104,7 @@ void get_sub_exit() { // catch child process die
     if (plugin != NULL && plugin_pid != 0) { // with plugin
         plugin_ret = waitpid(plugin_pid, &plugin_status, WNOHANG); // non-blocking
         if (plugin_ret == -1) {
-            perror("[Shadowsocks Bootstrap] plugin waitpid error");
+            log_perror("Plugin waitpid error");
             error_exit();
         } else if (plugin_ret) { // plugin exit
             sub_exit_info = get_exit_info(plugin_status, plugin_pid);
@@ -119,7 +115,7 @@ void get_sub_exit() { // catch child process die
     exited = 1;
 }
 
-char** plugin_env_load(sip003 *service) { // load plugin's environment variable
+char** load_plugin_env(sip003 *service) { // load plugin's environment variable
     char *remote_host = "SS_REMOTE_HOST=";
     char *remote_port = "SS_REMOTE_PORT=";
     char *local_host = "SS_LOCAL_HOST=";
@@ -146,15 +142,12 @@ char** plugin_env_load(sip003 *service) { // load plugin's environment variable
 
 void process_exec(sip003 *service) { // run shadowsocks main process and plugin
     if ((ss_pid = fork()) < 0) {
-        perror("[Shadowsocks Bootstrap] fork error");
+        log_perror("Shadowsocks fork error");
         error_exit();
     } else if (ss_pid == 0) { // child process
         prctl(PR_SET_PDEATHSIG, SIGKILL); // child die with his father
         if (execvp(service->shadowsocks_cmd[0], service->shadowsocks_cmd) < 0) {
-
             log_perror("Shadowsocks exec error");
-
-//            perror("[Shadowsocks Bootstrap] shadowsocks exec error");
             exit(2);
         }
     }
@@ -167,14 +160,14 @@ void process_exec(sip003 *service) { // run shadowsocks main process and plugin
         return;
     }
     if ((plugin_pid = fork()) < 0) {
-        perror("[Shadowsocks Bootstrap] fork error");
+        log_perror("Plugin fork error");
         error_exit();
     } else if (plugin_pid == 0) { // child process
         prctl(PR_SET_PDEATHSIG, SIGKILL); // child die with his father
-        char **plugin_env = plugin_env_load(service);
+        char **plugin_env = load_plugin_env(service);
         char *plugin_arg[] = { plugin, NULL };
         if (execvpe(plugin, plugin_arg, plugin_env) < 0) {
-            perror("[Shadowsocks Bootstrap] plugin exec error");
+            log_perror("Plugin exec error");
             exit(2);
         }
     }
