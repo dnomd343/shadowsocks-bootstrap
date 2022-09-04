@@ -1,20 +1,38 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "load.h"
+#include "logger.h"
 #include "common.h"
 #include "process.h"
-#include "help.h"
-#include "logger.h"
-#include "load.h"
+
+char *help_msg = "\n\
+ss-bootstrap-local\n\
+\n\
+    A simple program to make the original shadowsocks support SIP003 plugins.\n\
+\n\
+    -s <server_host>           Host name or IP address of your remote server.\n\
+    -p <server_port>           Port number of your remote server.\n\
+    -b <local_address>         Local address to bind.\n\
+    -l <local_port>            Port number of your local server.\n\
+\n\
+    -c <config_file>           Path to JSON config file.\n\
+    -k <password>              Password of your remote server.\n\
+    -m <method>                Encrypt method.\n\
+    -t <timeout>               Socket timeout in seconds.\n\
+    --fast-open                Enable TCP fast open (with Linux kernel 3.7+).\n\
+    --plugin <name>            Enable SIP003 plugin.\n\
+    --plugin-opts <options>    Set SIP003 plugin options.\n\
+    --shadowsocks <sslocal>    Set shadowsocks local program.\n\
+    --no-udp                   Do not use UDP proxy.\n\
+    -h, --help                 Print this message.\n\
+\n\
+";
 
 int main(int argc, char *argv[]) {
-    is_show_help(argc, argv, local_help_msg);
+    init(argc, argv, help_msg);
     log_info("Shadowsocks bootstrap local (%s)", VERSION);
+    boot_info *info = load_info(argc, argv);
 
-    // set log level
-//    bootstrap_info info;
-    load_info(argc, argv);
 //    params_load("sslocal"); // default file name
 //    start_bootstrap("sslocal", is_udp_proxy); // local or server mode
+
     return 0;
 }

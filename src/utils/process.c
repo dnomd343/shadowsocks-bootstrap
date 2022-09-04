@@ -1,7 +1,3 @@
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-//#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -237,6 +233,5 @@ void start_bootstrap(char *ss_type, int is_udp_proxy) { // start shadowsocks and
         printf("!!! get signal !!!\n");
     }
 
-//    g_main_loop_run(main_loop); // into main loop for wait
     exit_with_child();
 }

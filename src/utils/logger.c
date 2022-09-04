@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "logger.h"
 
-int log_level = LOG_DEBUG; // default log level
+int LOG_LEVEL = LOG_INFO; // default log level
 
 static const char *log_string[] = {
     "[DEBUG]",
@@ -20,7 +20,7 @@ static const char *log_color[] = {
 };
 
 void log_printf(int level, const char *fmt, ...) {
-    if (level < log_level) { // skip low log level
+    if (level < LOG_LEVEL) { // skip low log level
         return;
     }
     time_t t = time(NULL);

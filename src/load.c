@@ -1,11 +1,17 @@
 #include <stdlib.h>
 #include <string.h>
-#include "load.h"
 #include "common.h"
 #include "logger.h"
 #include "cJSON.h"
+#include "load.h"
 
-void init_info(bootstrap_info *info) {
+void init_info(boot_info *info);
+void dump_info(boot_info *info);
+char** add_extra_opts(char **opts, char *extra_opts_str);
+void json_decode(char *json_content, boot_info *info);
+int add_field(char *field, char **target, char ***arg, char ***arg_limit);
+
+void init_info(boot_info *info) {
     info->is_udp_proxy = 1; // enabled udp proxy
     info->server_addr = info->client_addr = NULL;
     info->server_port = info->client_port = NULL;
@@ -22,7 +28,7 @@ void init_info(bootstrap_info *info) {
     info->shadowsocks_opts[1] = NULL;
 }
 
-void dump_info(bootstrap_info *info) {
+void dump_info(boot_info *info) {
     if (info->is_udp_proxy) {
         log_debug("is_udp_proxy = true");
     } else {
@@ -51,30 +57,7 @@ void dump_info(bootstrap_info *info) {
     }
 }
 
-char** string_list_append(char **string_list, char *data) {
-    int num = 0;
-    while(string_list[num++] != NULL); // get string list size
-    string_list = (char**)realloc(string_list, sizeof(char**) * (num + 1));
-    string_list[num - 1] = new_string(data);
-    string_list[num] = NULL; // list end sign
-    return string_list;
-}
-
-int load_field(char *field, char **target, char ***arg, char ***arg_limit) {
-    if (strcmp(**arg, field)) { // field not match
-        return 0;
-    }
-    if (++(*arg) == *arg_limit) { // without next argument
-        log_fatal("`%s` require a parameter", field);
-    }
-    if (*target != NULL) {
-        free(*target); // override target field
-    }
-    *target = new_string(**arg);
-    return 1;
-}
-
-char** add_extra_options(char **opts, char *extra_opts_str) { // split shadowsocks extra options
+char** add_extra_opts(char **opts, char *extra_opts_str) { // split shadowsocks extra options
     log_debug("Split extra options -> `%s`", extra_opts_str);
     char *tmp = (char*)calloc(strlen(extra_opts_str) + 1, 1); // new memory and set as 0x00
     for (int i = 0, num = 0;; ++num) {
@@ -97,7 +80,7 @@ char** add_extra_options(char **opts, char *extra_opts_str) { // split shadowsoc
     return opts;
 }
 
-void json_decode(char *json_content, bootstrap_info *info) { // decode JSON content
+void json_decode(char *json_content, boot_info *info) { // decode JSON content
     cJSON* json = cJSON_Parse(json_content);
     if (json == NULL) {
         log_fatal("JSON format error");
@@ -211,26 +194,36 @@ void json_decode(char *json_content, bootstrap_info *info) { // decode JSON cont
             if (!cJSON_IsString(json)) {
                 log_fatal("`extra_opts` must be string");
             }
-            info->shadowsocks_opts = add_extra_options(info->shadowsocks_opts, json->valuestring);
+            info->shadowsocks_opts = add_extra_opts(info->shadowsocks_opts, json->valuestring);
         } else { // unknown field => ERROR
-
             log_fatal("Unknown JSON field `%s`", json->string);
-
         }
         json = json->next; // next field
     }
     cJSON_free(json); // free JSON struct
 }
 
+int add_field(char *field, char **target, char ***arg, char ***arg_limit) {
+    if (strcmp(**arg, field)) { // field not match
+        return 0;
+    }
+    if (++(*arg) == *arg_limit) { // without next argument
+        log_fatal("`%s` require a parameter", field);
+    }
+    if (*target != NULL) {
+        free(*target); // override target field
+    }
+    *target = new_string(**arg);
+    return 1;
+}
 
-void load_info(int argc, char **argv) { // load info from input parameters
-    bootstrap_info *info = (bootstrap_info*)malloc(sizeof(bootstrap_info));
+boot_info* load_info(int argc, char **argv) { // load info from input parameters
+    boot_info *info = (boot_info*)malloc(sizeof(boot_info));
     log_debug("Start to load input arguments");
     // TODO: output input args
     init_info(info);
     char **arg_limit = argv + argc;
     for (char **arg = argv + 1; arg < arg_limit; ++arg) {
-//        log_debug("Get argument -> `%s`", *arg);
         if (!strcmp(*arg, "--debug")) { // skip debug flag
             continue;
         } else if (!strcmp(*arg, "--fast-open")) { // --fast-open => fastopen
@@ -245,16 +238,16 @@ void load_info(int argc, char **argv) { // load info from input parameters
             json_decode(json_content, info); // decode json content
             free(json_content);
         } else if (
-            !load_field("-s", &info->server_addr, &arg, &arg_limit) &&
-            !load_field("-p", &info->server_port, &arg, &arg_limit) &&
-            !load_field("-b", &info->client_addr, &arg, &arg_limit) &&
-            !load_field("-l", &info->client_port, &arg, &arg_limit) &&
-            !load_field("-k", &info->password, &arg, &arg_limit) &&
-            !load_field("-m", &info->method, &arg, &arg_limit) &&
-            !load_field("-t", &info->timeout, &arg, &arg_limit) &&
-            !load_field("--plugin", &info->plugin, &arg, &arg_limit) &&
-            !load_field("--plugin-opts", &info->plugin_opts, &arg, &arg_limit) &&
-            !load_field("--shadowsocks", &info->shadowsocks, &arg, &arg_limit)
+            !add_field("-s", &info->server_addr, &arg, &arg_limit) &&
+            !add_field("-p", &info->server_port, &arg, &arg_limit) &&
+            !add_field("-b", &info->client_addr, &arg, &arg_limit) &&
+            !add_field("-l", &info->client_port, &arg, &arg_limit) &&
+            !add_field("-k", &info->password, &arg, &arg_limit) &&
+            !add_field("-m", &info->method, &arg, &arg_limit) &&
+            !add_field("-t", &info->timeout, &arg, &arg_limit) &&
+            !add_field("--plugin", &info->plugin, &arg, &arg_limit) &&
+            !add_field("--plugin-opts", &info->plugin_opts, &arg, &arg_limit) &&
+            !add_field("--shadowsocks", &info->shadowsocks, &arg, &arg_limit)
         ) { // archive unknown options
             log_info("Extra field -> %s", *arg);
             info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, *arg);
@@ -264,4 +257,5 @@ void load_info(int argc, char **argv) { // load info from input parameters
         info->server_addr = "127.0.0.1";
     }
     dump_info(info);
+    return info;
 }
