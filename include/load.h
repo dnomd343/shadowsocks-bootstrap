@@ -13,8 +13,8 @@ typedef struct {
     char *plugin_opts;
     char *shadowsocks;
     char **shadowsocks_opts;
-} boot_info;
+} bootstrap;
 
-boot_info* load_info(int argc, char **argv);
+bootstrap* load_info(int argc, char **argv);
 
 #endif

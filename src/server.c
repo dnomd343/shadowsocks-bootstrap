@@ -22,6 +22,7 @@ ss-bootstrap-server\n\
     --plugin-opts <options>    Set SIP003 plugin options.\n\
     --shadowsocks <ssservre>   Set shadowsocks server program.\n\
     --no-udp                   Do not use UDP proxy.\n\
+    --debug                    Enable debug mode.\n\
     -h, --help                 Print this message.\n\
 \n\
 ";
@@ -29,9 +30,9 @@ ss-bootstrap-server\n\
 int main(int argc, char *argv[]) {
     init(argc, argv, help_msg);
     log_info("Shadowsocks bootstrap server (%s)", VERSION);
-    boot_info *info = load_info(argc, argv);
+    bootstrap *info = load_info(argc, argv);
+    load_sip003("ssserver", info);
 
-//    params_load("ssserver"); // default file name
 //    start_bootstrap("ssserver", is_udp_proxy); // local or server mode
     return 0;
 }

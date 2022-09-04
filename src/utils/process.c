@@ -176,24 +176,7 @@ void exit_with_child() { // exit and kill his child process
     exit(1);
 }
 
-void show_params() { // show shadowsocks and plugin params
-    int num = 0;
-    printf("[Shadowsocks Bootstrap]");
-    while(shadowsocks_args[num] != NULL) {
-        printf(" %s", shadowsocks_args[num++]);
-    }
-    printf("\n");
-    if (plugin_file == NULL) {
-        printf("[Shadowsocks Bootstrap] Plugin no need.\n");
-        return;
-    }
-    printf("[Shadowsocks Bootstrap] Plugin -> %s\n", plugin_file);
-    printf("[Shadowsocks Bootstrap]   SS_REMOTE_HOST -> %s\n", SS_REMOTE_HOST);
-    printf("[Shadowsocks Bootstrap]   SS_REMOTE_PORT -> %s\n", SS_REMOTE_PORT);
-    printf("[Shadowsocks Bootstrap]   SS_LOCAL_HOST -> %s\n", SS_LOCAL_HOST);
-    printf("[Shadowsocks Bootstrap]   SS_LOCAL_PORT -> %s\n", SS_LOCAL_PORT);
-    printf("[Shadowsocks Bootstrap]   SS_PLUGIN_OPTIONS -> %s\n", SS_PLUGIN_OPTIONS);
-}
+
 
 void start_bootstrap(char *ss_type, int is_udp_proxy) { // start shadowsocks and plugin (optional)
     show_params();

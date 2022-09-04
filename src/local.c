@@ -1,4 +1,5 @@
 #include "load.h"
+#include "sip003.h"
 #include "logger.h"
 #include "common.h"
 #include "process.h"
@@ -22,6 +23,7 @@ ss-bootstrap-local\n\
     --plugin-opts <options>    Set SIP003 plugin options.\n\
     --shadowsocks <sslocal>    Set shadowsocks local program.\n\
     --no-udp                   Do not use UDP proxy.\n\
+    --debug                    Enable debug mode.\n\
     -h, --help                 Print this message.\n\
 \n\
 ";
@@ -29,9 +31,9 @@ ss-bootstrap-local\n\
 int main(int argc, char *argv[]) {
     init(argc, argv, help_msg);
     log_info("Shadowsocks bootstrap local (%s)", VERSION);
-    boot_info *info = load_info(argc, argv);
+    bootstrap *info = load_info(argc, argv);
+    load_sip003("sslocal", info);
 
-//    params_load("sslocal"); // default file name
 //    start_bootstrap("sslocal", is_udp_proxy); // local or server mode
 
     return 0;

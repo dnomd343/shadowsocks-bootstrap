@@ -5,13 +5,13 @@
 #include "cJSON.h"
 #include "load.h"
 
-void init_info(boot_info *info);
-void dump_info(boot_info *info);
+void init_info(bootstrap *info);
+void dump_info(bootstrap *info);
 char** add_extra_opts(char **opts, char *extra_opts_str);
-void json_decode(char *json_content, boot_info *info);
+void json_decode(char *json_content, bootstrap *info);
 int add_field(char *field, char **target, char ***arg, char ***arg_limit);
 
-void init_info(boot_info *info) {
+void init_info(bootstrap *info) {
     info->is_udp_proxy = 1; // enabled udp proxy
     info->server_addr = info->client_addr = NULL;
     info->server_port = info->client_port = NULL;
@@ -24,11 +24,10 @@ void init_info(boot_info *info) {
     info->shadowsocks = NULL;
     info->shadowsocks_opts = (char**)malloc(sizeof(char*) * 2); // two arguments
     info->shadowsocks_opts[0] = ""; // reserved for program name
-    // TODO: add reserved field after load
     info->shadowsocks_opts[1] = NULL;
 }
 
-void dump_info(boot_info *info) {
+void dump_info(bootstrap *info) {
     if (info->is_udp_proxy) {
         log_debug("is_udp_proxy = true");
     } else {
@@ -49,12 +48,10 @@ void dump_info(boot_info *info) {
     log_debug("plugin = %s", info->plugin);
     log_debug("plugin_opts = %s", info->plugin_opts);
     log_debug("shadowsocks = %s", info->shadowsocks);
-    log_debug("shadowsocks_opts:"); // TODO: combine as one line output
-    char **option = info->shadowsocks_opts;
-    while(*option != NULL) {
-        printf("  '%s'\n", *option);
-        ++option;
-    }
+
+    char *opts_str = string_list_join(info->shadowsocks_opts + 1);
+    log_debug("shadowsocks_opts: %s", opts_str); // combine output
+    free(opts_str);
 }
 
 char** add_extra_opts(char **opts, char *extra_opts_str) { // split shadowsocks extra options
@@ -80,7 +77,7 @@ char** add_extra_opts(char **opts, char *extra_opts_str) { // split shadowsocks 
     return opts;
 }
 
-void json_decode(char *json_content, boot_info *info) { // decode JSON content
+void json_decode(char *json_content, bootstrap *info) { // decode JSON content
     cJSON* json = cJSON_Parse(json_content);
     if (json == NULL) {
         log_fatal("JSON format error");
@@ -217,12 +214,19 @@ int add_field(char *field, char **target, char ***arg, char ***arg_limit) {
     return 1;
 }
 
-boot_info* load_info(int argc, char **argv) { // load info from input parameters
-    boot_info *info = (boot_info*)malloc(sizeof(boot_info));
-    log_debug("Start to load input arguments");
-    // TODO: output input args
-    init_info(info);
+bootstrap* load_info(int argc, char **argv) { // load info from input parameters
+    bootstrap *info = (bootstrap*)malloc(sizeof(bootstrap));
     char **arg_limit = argv + argc;
+
+    log_debug("Start to load input arguments");
+    char *arg_str = (char*)malloc(0);
+    for (char **arg = argv + 1; arg < arg_limit; ++arg) {
+        arg_str = (char*)realloc(arg_str, strlen(arg_str) + strlen(*arg) + 4);
+        arg_str = strcat(strcat(strcat(arg_str, "`"), *arg), "` ");
+    }
+    log_debug("Input arguments -> %s", arg_str);
+
+    init_info(info);
     for (char **arg = argv + 1; arg < arg_limit; ++arg) {
         if (!strcmp(*arg, "--debug")) { // skip debug flag
             continue;
@@ -249,7 +253,6 @@ boot_info* load_info(int argc, char **argv) { // load info from input parameters
             !add_field("--plugin-opts", &info->plugin_opts, &arg, &arg_limit) &&
             !add_field("--shadowsocks", &info->shadowsocks, &arg, &arg_limit)
         ) { // archive unknown options
-            log_info("Extra field -> %s", *arg);
             info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, *arg);
         }
     }

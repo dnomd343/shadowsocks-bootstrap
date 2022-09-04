@@ -1,60 +1,66 @@
+#include <stdlib.h>
 #include "sip003.h"
-#include "load.h"
+#include "logger.h"
+#include "common.h"
+#include "network.h"
 
-void params_load(char *ss_default, boot_info *info) { // load shadowsocks and plugin params
-    if (info->shadowsocks == NULL) {
-        info->shadowsocks = ss_default;
-    }
-    info->shadowsocks_opts[0] = info->shadowsocks; // fill with file name
-    if (info->plugin != NULL) { // with plugin
-        char *rand_port = int_to_string(get_available_port(RANDOM_PORT_START, RANDOM_PORT_END));
-        SS_REMOTE_HOST = info->server_addr;
-        SS_REMOTE_PORT = info->server_port;
-        SS_LOCAL_HOST = "127.0.0.1";
-        SS_LOCAL_PORT = rand_port;
-        info->server_addr = SS_LOCAL_HOST;
-        info->server_port = SS_LOCAL_PORT;
-        SS_PLUGIN_OPTIONS = info->plugin_opts;
-    }
-    pack_shadowsocks_params(info);
-    shadowsocks_args = info->shadowsocks_opts;
-    if (info->plugin == NULL) {
-        plugin_file = NULL;
+void dump_sip003(sip003 *service);
+void add_sip003_arg(bootstrap *info, char *key, char *value);
+
+void dump_sip003(sip003 *service) { // show shadowsocks and plugin params
+    char *cmd_str = string_list_join(service->shadowsocks_cmd);
+    log_info("Shadowsocks -> %s", cmd_str);
+    free(cmd_str);
+    if (service->plugin_file == NULL) {
+        log_info("Plugin no need");
     } else {
-        plugin_file = info->plugin;
+        log_info("Plugin -> `%s`", service->plugin_file);
+        log_info("SS_REMOTE_HOST -> `%s`", service->SS_REMOTE_HOST);
+        log_info("SS_REMOTE_PORT -> `%s`", service->SS_REMOTE_PORT);
+        log_info("SS_LOCAL_HOST -> `%s`", service->SS_LOCAL_HOST);
+        log_info("SS_LOCAL_PORT -> `%s`", service->SS_LOCAL_PORT);
+        log_info("SS_PLUGIN_OPTIONS -> `%s`", service->SS_PLUGIN_OPTIONS);
     }
 }
 
-void pack_shadowsocks_params(boot_info *info) { // packaging shadowsocks parameters
-    if (info->server_addr != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-s");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->server_addr);
+void add_sip003_arg(bootstrap *info, char *key, char *value) {
+    if (value != NULL) {
+        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, key);
+        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, value);
     }
-    if (info->client_addr != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-b");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->client_addr);
+}
+
+sip003* load_sip003(char *ss_default, bootstrap *info) { // load shadowsocks and plugin params
+    sip003 *service = (sip003*)malloc(sizeof(sip003));
+    if (info->shadowsocks == NULL) {
+        info->shadowsocks = ss_default; // load default shadowsocks name
     }
-    if (info->server_port != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-p");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->server_port);
+    info->shadowsocks_opts[0] = info->shadowsocks; // fill with file name
+
+    service->plugin_file = NULL;
+    if (info->plugin != NULL) { // with sip003 plugin
+        char *rand_port = int_to_string(get_available_port(RANDOM_PORT_START, RANDOM_PORT_END));
+        service->SS_REMOTE_HOST = info->server_addr;
+        service->SS_REMOTE_PORT = info->server_port;
+        service->SS_LOCAL_HOST = "127.0.0.1";
+        service->SS_LOCAL_PORT = rand_port;
+        service->SS_PLUGIN_OPTIONS = info->plugin_opts;
+        info->server_addr = service->SS_LOCAL_HOST;
+        info->server_port = service->SS_LOCAL_PORT;
+        service->plugin_file = info->plugin;
     }
-    if (info->client_port != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-l");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->client_port);
-    }
-    if (info->password != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-k");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->password);
-    }
-    if (info->method != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-m");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->method);
-    }
-    if (info->timeout != NULL) {
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "-t");
-        info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, info->timeout);
-    }
+
+    add_sip003_arg(info, "-s", info->server_addr);
+    add_sip003_arg(info, "-b", info->client_addr);
+    add_sip003_arg(info, "-p", info->server_port);
+    add_sip003_arg(info, "-l", info->client_port);
+    add_sip003_arg(info, "-k", info->password);
+    add_sip003_arg(info, "-m", info->method);
+    add_sip003_arg(info, "-t", info->timeout);
     if (info->fastopen) {
         info->shadowsocks_opts = string_list_append(info->shadowsocks_opts, "--fast-open");
     }
+    service->shadowsocks_cmd = info->shadowsocks_opts;
+    dump_sip003(service);
+    return service;
 }

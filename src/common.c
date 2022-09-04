@@ -31,6 +31,16 @@ char** string_list_append(char **string_list, char *data) {
     return string_list;
 }
 
+char* string_list_join(char **string_list) { // combine string list -> `str_1` `str_2` `str_3` ...
+    char *join_str = (char*)malloc(0);
+    for (char **str = string_list; *str != NULL; ++str) {
+        join_str = (char*)realloc(join_str, strlen(join_str) + strlen(*str) + 4);
+        join_str = strcat(strcat(join_str, "`"), *str);
+        join_str = strcat(join_str, "` ");
+    }
+    return join_str;
+}
+
 char* read_file(char *file_name) { // read file content
     log_debug("Start read file -> %s", file_name);
     FILE *pfile = fopen(file_name, "rb");
