@@ -7,11 +7,12 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include "network.h"
+#include "logger.h"
 
 #define TIMEOUT 15
 #define BUFFER_SIZE 4096
 
-int proxy_exit;
+int PROXY_EXIT;
 
 int get_random_num(int range_start, int range_end);
 int check_port_available(unsigned int port, int is_udp, int is_ipv6);
@@ -256,12 +257,12 @@ void ipv4_proxy(void *ipv4_info) { // 代理IPv4客户端
     char *recv_buffer = (char*)malloc(BUFFER_SIZE); // 申请接收缓冲区内存
     long recv_len = send_and_receive(info->server_ip, info->server_port, info->buffer, info->len, recv_buffer); // 服务端交互
     if (recv_len < 0) { // 服务端超时
-        printf("[Shadowsocks Bootstrap] UDP Proxy: server return timeout\n");
+        log_warn("UDP Proxy: server return timeout");
     } else {
         if (sendto(info->ipv4_client_fd, recv_buffer, recv_len, 0, (struct sockaddr*)&(info->ipv4_client_addr), sizeof(info->ipv4_client_addr)) < 0) { // 服务端数据返回给客户端
             perror("[Shadowsocks Bootstrap] IPv4 UDP return failed");
         } else {
-            printf("[Shadowsocks Bootstrap] UDP Proxy: ↑ %ld bytes ↓ %ld bytes\n", info->len, recv_len);
+            log_info("UDP Proxy: ↑ %ld bytes ↓ %ld bytes", info->len, recv_len);
         }
     }
     free(recv_buffer); // 释放接收缓冲区内存
@@ -274,12 +275,12 @@ void ipv6_proxy(void *ipv6_info) { // 代理IPv6客户端
     char *recv_buffer = (char*)malloc(BUFFER_SIZE); // 申请接收缓冲区内存
     long recv_len = send_and_receive(info->server_ip, info->server_port, info->buffer, info->len, recv_buffer); // 服务端交互
     if (recv_len < 0) { // 服务端超时
-        printf("[Shadowsocks Bootstrap] Server return timeout\n");
+        log_warn("UDP Proxy: Server return timeout");
     } else {
         if (sendto(info->ipv6_client_fd, recv_buffer, recv_len, 0, (struct sockaddr*)&(info->ipv6_client_addr), sizeof(info->ipv6_client_addr)) < 0) { // 服务端数据返回给客户端
             perror("[Shadowsocks Bootstrap] IPv6 UDP return failed");
         } else {
-            printf("[Shadowsocks Bootstrap] UDP Proxy: ↑ %ld bytes ↓ %ld bytes\n", info->len, recv_len);
+            log_info("UDP Proxy: ↑ %ld bytes ↓ %ld bytes", info->len, recv_len);
         }
     }
     free(recv_buffer); // 释放接收缓冲区内存
@@ -310,12 +311,12 @@ void proxy(char *server_ip, int server_port, char *listen_ip, int listen_port) {
         }
     }
     if (bind_error_flag) { // 端口被占用
-        printf("[Shadowsocks Bootstrap] The UDP port seems to be occupied by the SIP003 plugin\n");
-        printf("[Shadowsocks Bootstrap] WARNING: UDP communication of the agent will not work properly\n");
+        log_warn("The UDP port seems to be occupied by the SIP003 plugin");
+        log_warn("UDP communication of the agent will not work properly");
         return;
     }
-    proxy_exit = 0; // 重置退出标识
-    printf("[Shadowsocks Bootstrap] UDP Proxy: %s:%d -> %s:%d\n", listen_ip, listen_port, server_ip, server_port);
+    PROXY_EXIT = 0; // 重置退出标识
+    log_info("UDP Proxy: %s:%d -> %s:%d", listen_ip, listen_port, server_ip, server_port);
     for (;;) {
         if (!is_listen_ipv6) { // IPv4客户端
             recv_len = recvfrom(ipv4_client_fd, recv_buffer, BUFFER_SIZE, 0, (struct sockaddr*)&ipv4_client_addr, &ipv4_client_addr_len);
@@ -342,7 +343,7 @@ void proxy(char *server_ip, int server_port, char *listen_ip, int listen_port) {
             info->len = recv_len;
             pthread_create(&tid, NULL, (void*)ipv6_proxy, (void*)info); // 新线程代理请求
         }
-        if (proxy_exit) {
+        if (PROXY_EXIT) {
             break; // 退出代理
         }
     }

@@ -38,6 +38,7 @@ sip003* load_sip003(char *ss_default, bootstrap *info) { // load shadowsocks and
     info->shadowsocks_opts[0] = info->shadowsocks; // fill with file name
 
     service->plugin_file = NULL;
+    service->is_udp_proxy = info->is_udp_proxy;
     if (info->plugin != NULL) { // with sip003 plugin
         char *rand_port = int_to_string(get_available_port(RANDOM_PORT_START, RANDOM_PORT_END));
         service->SS_REMOTE_HOST = info->server_addr;

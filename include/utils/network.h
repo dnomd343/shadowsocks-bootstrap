@@ -1,7 +1,7 @@
 #ifndef _NETWORK_H_
 #define _NETWORK_H_
 
-extern int proxy_exit;
+extern int PROXY_EXIT;
 
 int is_ip_addr(char *address);
 int get_available_port(unsigned short range_start, unsigned short range_end);

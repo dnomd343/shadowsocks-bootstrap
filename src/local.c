@@ -32,9 +32,6 @@ int main(int argc, char *argv[]) {
     init(argc, argv, help_msg);
     log_info("Shadowsocks bootstrap local (%s)", VERSION);
     bootstrap *info = load_info(argc, argv);
-    load_sip003("sslocal", info);
-
-//    start_bootstrap("sslocal", is_udp_proxy); // local or server mode
-
+    start_bootstrap(1, load_sip003("sslocal", info));
     return 0;
 }

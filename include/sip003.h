@@ -11,6 +11,7 @@ typedef struct {
     char *SS_PLUGIN_OPTIONS;
     char *plugin_file;
     char **shadowsocks_cmd;
+    int is_udp_proxy;
 } sip003;
 
 sip003* load_sip003(char *ss_default, bootstrap *info);

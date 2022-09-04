@@ -40,3 +40,15 @@ void log_printf(int level, const char *fmt, ...) {
         exit(1);
     }
 }
+
+void log_perror(char *prefix) {
+    time_t t;
+    time(&t);
+    struct tm *lt = localtime(&t);
+    fprintf(stderr, "\x1b[36m[Bootstrap]\x1b[0m ");
+    fprintf(stderr, "\x1b[90m%04d-%02d-%02d %02d:%02d:%02d\x1b[0m",
+            lt->tm_year + 1900, lt->tm_mon, lt->tm_mday, lt->tm_hour, lt->tm_min, lt->tm_sec);
+    fprintf(stderr, " %s%s\x1b[0m ", log_color[3], log_string[3]); // error level
+    fflush(stderr);
+    perror(prefix);
+}

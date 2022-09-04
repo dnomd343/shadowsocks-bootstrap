@@ -1,17 +1,17 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "logger.h"
 #include "dns.h"
 
 char** init_dns_result();
 char** add_dns_result(char **dns_result, char *str);
 void free_dns_result(char **dns_result);
-char** ipv4_dns_resolve(char *domain);
-char** ipv6_dns_resolve(char *domain);
+char** ipv4_dns_resolve(const char *domain);
+char** ipv6_dns_resolve(const char *domain);
 
 char** init_dns_result() { // 初始化DNS解析存储结构
     char **dns_result = (char**)malloc(sizeof(char*));
@@ -35,7 +35,7 @@ void free_dns_result(char **dns_result) { // 释放DNS解析结果
     }
 }
 
-char** ipv4_dns_resolve(char *domain) { // DNS解析IPv4地址
+char** ipv4_dns_resolve(const char *domain) { // DNS解析IPv4地址
     char **result = init_dns_result();
     char ip_str[16]; // IPv4地址字符串 (3 * 4 + 1 * 3 + 1)
     struct sockaddr_in *ipv4_addr;
@@ -45,7 +45,7 @@ char** ipv4_dns_resolve(char *domain) { // DNS解析IPv4地址
     hint.ai_socktype = SOCK_STREAM;
     int ret = getaddrinfo(domain, NULL, &hint, &answer); // 发起解析
     if (ret != 0) { // 解析失败
-        printf("[Shadowsocks Bootstrap] IPv4 DNS resolve `%s`: %s\n", domain, gai_strerror(ret));
+        log_debug("IPv4 DNS resolve `%s`: %s", domain, gai_strerror(ret));
         return result; // 返回空数据
     }
     for (p = answer; p != NULL; p = p->ai_next) { // 遍历解析结果
@@ -57,7 +57,7 @@ char** ipv4_dns_resolve(char *domain) { // DNS解析IPv4地址
     return result;
 }
 
-char** ipv6_dns_resolve(char *domain) { // DNS解析IPv6地址
+char** ipv6_dns_resolve(const char *domain) { // DNS解析IPv6地址
     char **result = init_dns_result();
     char ip_str[40]; // IPv6地址字符串 (4 * 8 + 1 * 7 + 1)
     struct sockaddr_in6 *ipv6_addr;
@@ -67,7 +67,7 @@ char** ipv6_dns_resolve(char *domain) { // DNS解析IPv6地址
     hint.ai_socktype = SOCK_STREAM;
     int ret = getaddrinfo(domain, NULL, &hint, &answer); // 发起解析
     if (ret != 0) { // 解析失败
-        printf("[Shadowsocks Bootstrap] IPv6 DNS resolve `%s`: %s\n", domain, gai_strerror(ret));
+        log_debug("IPv6 DNS resolve `%s`: %s", domain, gai_strerror(ret));
         return result; // 返回空数据
     }
     for (p = answer; p != NULL; p = p->ai_next) { // 遍历解析结果
@@ -79,7 +79,7 @@ char** ipv6_dns_resolve(char *domain) { // DNS解析IPv6地址
     return result;
 }
 
-char* dns_resolve(char *domain) { // DNS解析 返回首个IP地址 IPv4优先
+char* dns_resolve(const char *domain) { // DNS解析 返回首个IP地址 IPv4优先
     int num = 0;
     char **result = ipv4_dns_resolve(domain); // IPv4解析
     while(result[num++] != NULL); // num - 1 为IPv4地址数
