@@ -64,7 +64,7 @@ char* read_file(char *file_name) { // read file content
 
 void init(int argc, char **argv, char *help_msg) {
     if (argc <= 1) { // with only one argument
-        printf("%s", help_msg);
+        printf(help_msg, VERSION);
         exit(0);
     }
     for (int i = 0; i < argc; ++i) {
@@ -72,7 +72,7 @@ void init(int argc, char **argv, char *help_msg) {
             LOG_LEVEL = LOG_DEBUG;
         }
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) { // include `-h` or `--help`
-            printf("%s", help_msg);
+            printf(help_msg, VERSION);
             exit(0);
         }
     }

@@ -4,7 +4,7 @@
 #include "process.h"
 
 char *help_msg = "\n\
-ss-bootstrap-server\n\
+ss-bootstrap-server (%s)\n\
 \n\
     A simple program to make the original shadowsocks support SIP003 plugins.\n\
 \n\
