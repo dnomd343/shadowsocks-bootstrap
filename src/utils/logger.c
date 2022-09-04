@@ -1,4 +1,7 @@
+#include <time.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "logger.h"
 
 int LOG_LEVEL = LOG_INFO; // default log level
