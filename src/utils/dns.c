@@ -22,7 +22,7 @@ char** init_dns_result() { // 初始化DNS解析存储结构
 char** add_dns_result(char **dns_result, char *str) { // 添加DNS解析记录
     int num = 0;
     while(dns_result[num++] != NULL); // 获取原存储个数
-    dns_result = (char**)realloc(dns_result, sizeof(char**) * (num + 1));
+    dns_result = (char**)realloc(dns_result, sizeof(char*) * (num + 1));
     dns_result[num - 1] = strcpy((char*)malloc(strlen(str) + 1), str);
     dns_result[num] = NULL; // 结束标志
     return dns_result;

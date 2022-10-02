@@ -10,7 +10,7 @@ char* new_string(char *str) {
 
 char* int_to_string(int num) { // int -> string
     if (num < 0) {
-        log_fatal("number must be positive");
+        log_fatal("Number must be positive");
     }
     int count = 0;
     int temp = num;
@@ -26,7 +26,7 @@ char* int_to_string(int num) { // int -> string
 char** string_list_append(char **string_list, char *data) {
     int num = 0;
     while(string_list[num++] != NULL); // get string list size
-    string_list = (char**)realloc(string_list, sizeof(char**) * (num + 1));
+    string_list = (char**)realloc(string_list, sizeof(char*) * (num + 1));
     string_list[num - 1] = new_string(data);
     string_list[num] = NULL; // list end sign
     return string_list;
