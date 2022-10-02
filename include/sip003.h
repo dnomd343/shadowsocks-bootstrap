@@ -1,5 +1,5 @@
-#ifndef _SIP003_H_
-#define _SIP003_H_
+#ifndef SIP003_H_
+#define SIP003_H_
 
 #include "load.h"
 

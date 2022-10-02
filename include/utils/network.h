@@ -1,5 +1,5 @@
-#ifndef _NETWORK_H_
-#define _NETWORK_H_
+#ifndef NETWORK_H_
+#define NETWORK_H_
 
 extern int PROXY_EXIT;
 

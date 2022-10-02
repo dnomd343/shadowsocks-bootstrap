@@ -1,5 +1,5 @@
-#ifndef _LOAD_H_
-#define _LOAD_H_
+#ifndef LOAD_H_
+#define LOAD_H_
 
 typedef struct {
     int is_udp_proxy;

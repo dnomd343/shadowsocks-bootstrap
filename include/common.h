@@ -1,5 +1,5 @@
-#ifndef _COMMON_H_
-#define _COMMON_H_
+#ifndef COMMON_H_
+#define COMMON_H_
 
 #define VERSION "1.0.0-beta"
 

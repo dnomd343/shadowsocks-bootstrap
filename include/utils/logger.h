@@ -1,5 +1,5 @@
-#ifndef _LOG_H
-#define _LOG_H
+#ifndef LOG_H
+#define LOG_H
 
 enum {
     LOG_DEBUG,
