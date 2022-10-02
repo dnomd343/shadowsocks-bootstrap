@@ -1,5 +1,7 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef LOGGER_H_
+#define LOGGER_H_
+
+#define LOG_PREFIX "Bootstrap"
 
 enum {
     LOG_DEBUG,
@@ -16,7 +18,7 @@ enum {
 #define log_fatal(...) log_printf(LOG_FATAL, __VA_ARGS__)
 
 extern int LOG_LEVEL;
-void log_perror(char *prefix);
+void log_perror(const char *fmt, ...);
 void log_printf(int level, const char *fmt, ...);
 
 #endif
