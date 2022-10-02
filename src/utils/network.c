@@ -152,7 +152,7 @@ int create_ipv4_udp_sock(char *address, int port) { // 创建并绑定IPv4 UDP�
         ipv4_udp_addr.sin_addr.s_addr = inet_addr(address); // 监听地址
     }
     if (bind(ipv4_udp_sock, (struct sockaddr*)&ipv4_udp_addr, sizeof(ipv4_udp_addr)) < 0) { // 绑定接口
-        log_perror("IPv4 UDP Sock bind error");
+        log_perror("IPv4 UDP Sock bind error -> ");
         return -1; // 端口被占用
     }
     return ipv4_udp_sock;
@@ -170,7 +170,7 @@ int create_ipv6_udp_sock(char *address, int port) { // 创建并绑定IPv6 UDP�
         inet_pton(AF_INET6, address, &ipv6_udp_addr.sin6_addr); // 监听地址
     }
     if (bind(ipv6_udp_sock, (struct sockaddr*)&ipv6_udp_addr, sizeof(ipv6_udp_addr)) < 0) { // 绑定接口
-        log_perror("IPv6 UDP Sock bind error");
+        log_perror("IPv6 UDP Sock bind error -> ");
         return -1; // 端口被占用
     }
     return ipv6_udp_sock;
@@ -220,7 +220,7 @@ long ipv4_send_and_receive(char *ipv4_server_ip, int ipv4_server_port, char *sen
     ipv4_server_addr.sin_port = htons(ipv4_server_port); // 目标端口
     ipv4_server_addr.sin_addr.s_addr = inet_addr(ipv4_server_ip); // 目标IP
     if (sendto(ipv4_server_fd, send_buffer, send_len, 0, (struct sockaddr*)&ipv4_server_addr, sizeof(ipv4_server_addr)) < 0) { // 发送缓冲区数据
-        log_perror("IPv4 UDP send failed");
+        log_perror("IPv4 UDP send failed -> ");
     }
     long recv_len = ipv4_receive(ipv4_server_fd, recv_buffer, BUFFER_SIZE, TIMEOUT, ipv4_server_addr); // 接收数据到缓冲区
     close(ipv4_server_fd); // 关闭描述符
@@ -235,7 +235,7 @@ long ipv6_send_and_receive(char *ipv6_server_ip, int ipv6_server_port, char *sen
     ipv6_server_addr.sin6_port = htons(ipv6_server_port); // 目标端口
     inet_pton(AF_INET6, ipv6_server_ip, &ipv6_server_addr.sin6_addr); // 目标IP
     if (sendto(ipv6_server_fd, send_buffer, send_len, 0, (struct sockaddr*)&ipv6_server_addr, sizeof(ipv6_server_addr)) < 0) { // 发送缓冲区数据
-        log_perror("IPv6 UDP send failed");
+        log_perror("IPv6 UDP send failed -> ");
     }
     long recv_len = ipv6_receive(ipv6_server_fd, recv_buffer, BUFFER_SIZE, TIMEOUT, ipv6_server_addr); // 接收数据到缓冲区
     close(ipv6_server_fd); // 关闭描述符
@@ -258,7 +258,7 @@ void ipv4_proxy(void *ipv4_info) { // 代理IPv4客户端
         log_warn("UDP Proxy: server return timeout");
     } else {
         if (sendto(info->ipv4_client_fd, recv_buffer, recv_len, 0, (struct sockaddr*)&(info->ipv4_client_addr), sizeof(info->ipv4_client_addr)) < 0) { // 服务端数据返回给客户端
-            log_perror("IPv4 UDP return failed");
+            log_perror("IPv4 UDP return failed -> ");
         } else {
             log_info("UDP Proxy: ↑ %ld bytes ↓ %ld bytes", info->len, recv_len);
         }
@@ -276,7 +276,7 @@ void ipv6_proxy(void *ipv6_info) { // 代理IPv6客户端
         log_warn("UDP Proxy: Server return timeout");
     } else {
         if (sendto(info->ipv6_client_fd, recv_buffer, recv_len, 0, (struct sockaddr*)&(info->ipv6_client_addr), sizeof(info->ipv6_client_addr)) < 0) { // 服务端数据返回给客户端
-            log_perror("IPv6 UDP return failed");
+            log_perror("IPv6 UDP return failed -> ");
         } else {
             log_info("UDP Proxy: ↑ %ld bytes ↓ %ld bytes", info->len, recv_len);
         }

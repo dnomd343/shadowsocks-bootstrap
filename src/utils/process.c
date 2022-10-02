@@ -93,7 +93,7 @@ void get_sub_exit() { // catch child process die
     if (ss_pid != 0) {
         ss_ret = waitpid(ss_pid, &ss_status, WNOHANG); // non-blocking
         if (ss_ret == -1) {
-            log_perror("Shadowsocks waitpid error");
+            log_perror("Shadowsocks waitpid error -> ");
             error_exit();
         } else if (ss_ret) { // ss exit
             sub_exit_info = get_exit_info(ss_status, ss_pid);
@@ -104,7 +104,7 @@ void get_sub_exit() { // catch child process die
     if (plugin != NULL && plugin_pid != 0) { // with plugin
         plugin_ret = waitpid(plugin_pid, &plugin_status, WNOHANG); // non-blocking
         if (plugin_ret == -1) {
-            log_perror("Plugin waitpid error");
+            log_perror("Plugin waitpid error -> ");
             error_exit();
         } else if (plugin_ret) { // plugin exit
             sub_exit_info = get_exit_info(plugin_status, plugin_pid);
@@ -142,12 +142,12 @@ char** load_plugin_env(sip003 *service) { // load plugin's environment variable
 
 void process_exec(sip003 *service) { // run shadowsocks main process and plugin
     if ((ss_pid = fork()) < 0) {
-        log_perror("Shadowsocks fork error");
+        log_perror("Shadowsocks fork error -> ");
         error_exit();
     } else if (ss_pid == 0) { // child process
         prctl(PR_SET_PDEATHSIG, SIGKILL); // child die with his father
         if (execvp(service->shadowsocks_cmd[0], service->shadowsocks_cmd) < 0) {
-            log_perror("Shadowsocks exec error");
+            log_perror("Shadowsocks exec error -> ");
             exit(2);
         }
     }
@@ -160,14 +160,14 @@ void process_exec(sip003 *service) { // run shadowsocks main process and plugin
         return;
     }
     if ((plugin_pid = fork()) < 0) {
-        log_perror("Plugin fork error");
+        log_perror("Plugin fork error -> ");
         error_exit();
     } else if (plugin_pid == 0) { // child process
         prctl(PR_SET_PDEATHSIG, SIGKILL); // child die with his father
         char **plugin_env = load_plugin_env(service);
         char *plugin_arg[] = { plugin, NULL };
         if (execvpe(plugin, plugin_arg, plugin_env) < 0) {
-            log_perror("Plugin exec error");
+            log_perror("Plugin exec error -> ");
             exit(2);
         }
     }
