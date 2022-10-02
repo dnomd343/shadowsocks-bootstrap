@@ -3,7 +3,7 @@
 #include "common.h"
 #include "process.h"
 
-char *help_msg = "\n\
+#define HELP_MSG "\n\
 ss-bootstrap-local (%s)\n\
 \n\
     A simple program to make the original shadowsocks support SIP003 plugins.\n\
@@ -24,11 +24,10 @@ ss-bootstrap-local (%s)\n\
     --no-udp                   Do not use UDP proxy.\n\
     --debug                    Enable debug mode.\n\
     -h, --help                 Print this message.\n\
-\n\
-";
+\n"
 
 int main(int argc, char *argv[]) {
-    init(argc, argv, help_msg);
+    init(argc, argv, HELP_MSG);
     log_info("Shadowsocks bootstrap local (%s)", VERSION);
     bootstrap *info = load_info(argc, argv);
     start_bootstrap(1, load_sip003("sslocal", info));

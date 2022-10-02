@@ -4,7 +4,7 @@
 #include "logger.h"
 #include "common.h"
 
-char* new_string(char *str) {
+char* new_string(const char *str) {
     return strcpy((char*)malloc(strlen(str) + 1), str);
 }
 
@@ -23,7 +23,7 @@ char* int_to_string(int num) { // int -> string
     return str;
 }
 
-char** string_list_append(char **string_list, char *data) {
+char** string_list_append(char **string_list, const char *data) {
     int num = 0;
     while(string_list[num++] != NULL); // get string list size
     string_list = (char**)realloc(string_list, sizeof(char*) * (num + 1));
@@ -42,7 +42,7 @@ char* string_list_join(char **string_list) { // combine string list -> `str_1` `
     return join_str;
 }
 
-char* read_file(char *file_name) { // read file content
+char* read_file(const char *file_name) { // read file content
     log_debug("Start read file -> %s", file_name);
     FILE *pfile = fopen(file_name, "rb");
     if (pfile == NULL) { // file open failed
@@ -62,7 +62,7 @@ char* read_file(char *file_name) { // read file content
     return file_content;
 }
 
-void init(int argc, char **argv, char *help_msg) {
+void init(int argc, char **argv, const char *help_msg) {
     if (argc <= 1) { // with only one argument
         printf(help_msg, VERSION);
         exit(0);
@@ -72,7 +72,7 @@ void init(int argc, char **argv, char *help_msg) {
             LOG_LEVEL = LOG_DEBUG;
         }
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) { // include `-h` or `--help`
-            printf(help_msg, VERSION);
+            printf(help_msg, VERSION); // show help message
             exit(0);
         }
     }
