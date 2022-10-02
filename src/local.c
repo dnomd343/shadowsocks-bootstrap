@@ -30,6 +30,6 @@ int main(int argc, char *argv[]) {
     init(argc, argv, HELP_MSG);
     log_info("Shadowsocks bootstrap local (%s)", VERSION);
     bootstrap *info = load_info(argc, argv);
-    start_bootstrap(1, load_sip003("sslocal", info));
+    start_bootstrap(TRUE, load_sip003("sslocal", info));
     return 0;
 }

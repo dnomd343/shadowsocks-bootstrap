@@ -1,6 +1,9 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+#define TRUE  1
+#define FALSE 0
+
 #define VERSION "1.0.1-beta"
 
 #define RANDOM_PORT_START 41952

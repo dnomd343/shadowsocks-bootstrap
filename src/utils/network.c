@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include "network.h"
+#include "common.h"
 #include "logger.h"
 
 #define TIMEOUT 15
@@ -63,7 +64,7 @@ int check_port_available(unsigned int port, int is_udp, int is_ipv6) { // test a
     ipv4_tcp_addr.sin_port = htons(port);
     ipv4_tcp_addr.sin_addr.s_addr = INADDR_ANY;
     if (bind(ipv4_tcp_sock, (struct sockaddr*)&ipv4_tcp_addr, sizeof(ipv4_tcp_addr)) < 0) {
-        return 0; // false
+        return FALSE;
     }
     close(ipv4_tcp_sock);
 
@@ -74,13 +75,13 @@ int check_port_available(unsigned int port, int is_udp, int is_ipv6) { // test a
         ipv4_udp_addr.sin_port = htons(port);
         ipv4_udp_addr.sin_addr.s_addr = INADDR_ANY;
         if (bind(ipv4_udp_sock, (struct sockaddr*)&ipv4_udp_addr, sizeof(ipv4_udp_addr)) < 0) {
-            return 0; // false
+            return FALSE;
         }
         close(ipv4_udp_sock);
     }
 
     if (!is_ipv6) { // ipv6 ignore
-        return 1; // true
+        return TRUE;
     }
 
     ipv6_tcp_sock = socket(AF_INET6, SOCK_STREAM, 0);
@@ -89,7 +90,7 @@ int check_port_available(unsigned int port, int is_udp, int is_ipv6) { // test a
     ipv6_tcp_addr.sin6_port = htons(port);
     ipv6_tcp_addr.sin6_addr = in6addr_any;
     if (bind(ipv6_tcp_sock, (struct sockaddr*)&ipv6_tcp_addr, sizeof(ipv6_tcp_addr)) < 0) {
-        return 0; // false
+        return FALSE;
     }
     close(ipv6_tcp_sock);
 
@@ -100,19 +101,19 @@ int check_port_available(unsigned int port, int is_udp, int is_ipv6) { // test a
         ipv6_udp_addr.sin6_port = htons(port);
         ipv6_udp_addr.sin6_addr = in6addr_any;
         if (bind(ipv6_udp_sock, (struct sockaddr*)&ipv6_udp_addr, sizeof(ipv6_udp_addr)) < 0) {
-            return 0; // false
+            return FALSE;
         }
         close(ipv6_udp_sock);
     }
 
-    return 1; // true
+    return TRUE;
 }
 
 int get_available_port(unsigned short range_start, unsigned short range_end) { // get a available port
     unsigned short port;
     for (;;) { // wait until a available port in range
         port = get_random_num(range_start, range_end); // get a random port in range
-        if (check_port_available(port, 1, 1)) { // port available
+        if (check_port_available(port, TRUE, TRUE)) { // port available
             return (int)port;
         }
     }
@@ -120,24 +121,24 @@ int get_available_port(unsigned short range_start, unsigned short range_end) { /
 
 int is_ipv4_addr(char *address) { // 判断是否为IPv4地址
     if (inet_addr(address) == -1) {
-        return 0;
+        return FALSE;
     }
-    return 1;
+    return TRUE;
 }
 
 int is_ipv6_addr(char *address) { // 判断是否为IPv6地址
     char buf[sizeof(struct in6_addr)];
     if (inet_pton(AF_INET6, address, buf) <= 0) {
-        return 0;
+        return FALSE;
     }
-    return 1;
+    return TRUE;
 }
 
 int is_ip_addr(char *address) { // 判断是否为IP地址
     if (is_ipv4_addr(address) || is_ipv6_addr(address)) {
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
 int create_ipv4_udp_sock(char *address, int port) { // 创建并绑定IPv4 UDP端口
@@ -295,17 +296,17 @@ void proxy(char *server_ip, int server_port, char *listen_ip, int listen_port) {
     struct sockaddr_in6 ipv6_client_addr;
     socklen_t ipv4_client_addr_len = sizeof(ipv4_client_addr);
     socklen_t ipv6_client_addr_len = sizeof(ipv6_client_addr);
-    int bind_error_flag = 0;
+    int bind_error_flag = FALSE;
     int is_listen_ipv6 = is_ipv6_addr(listen_ip); // 判断监听地址是否为IPv6
     if (!is_listen_ipv6) { // IPv4客户端
         ipv4_client_fd = create_ipv4_udp_sock(listen_ip, listen_port); // 监听端口描述符
         if (ipv4_client_fd == -1) { // 端口监听失败
-            bind_error_flag = 1;
+            bind_error_flag = TRUE;
         }
     } else { // IPv6客户端
         ipv6_client_fd = create_ipv6_udp_sock(listen_ip, listen_port); // 监听端口描述符
         if (ipv6_client_fd == -1) { // 端口监听失败
-            bind_error_flag = 1;
+            bind_error_flag = TRUE;
         }
     }
     if (bind_error_flag) { // 端口被占用
@@ -313,7 +314,7 @@ void proxy(char *server_ip, int server_port, char *listen_ip, int listen_port) {
         log_warn("UDP communication of the agent will not work properly");
         return;
     }
-    PROXY_EXIT = 0; // 重置退出标识
+    PROXY_EXIT = FALSE; // 重置退出标识
     log_info("UDP Proxy: %s:%d -> %s:%d", listen_ip, listen_port, server_ip, server_port);
     for (;;) {
         if (!is_listen_ipv6) { // IPv4客户端

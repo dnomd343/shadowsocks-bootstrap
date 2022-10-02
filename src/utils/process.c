@@ -9,6 +9,7 @@
 #include <sys/prctl.h>
 #include "network.h"
 #include "process.h"
+#include "common.h"
 #include "logger.h"
 #include "dns.h"
 
@@ -20,8 +21,8 @@ typedef struct {
 
 char *plugin;
 pid_t ss_pid = 0, plugin_pid = 0;
-int exiting = 0; // sub process exiting
-int exited = 0; // all sub process exited
+int exiting = FALSE; // sub process exiting
+int exited = FALSE; // all sub process exited
 
 void error_exit();
 void normal_exit();
@@ -71,8 +72,8 @@ void kill_sub_process() { // kill child process
     while (exiting) {
         sleep(1); // exit process already working -> block
     }
-    exiting = 1; // exit process flag
-    PROXY_EXIT = 1; // udp proxy cancel
+    exiting = TRUE; // exit process flag
+    PROXY_EXIT = TRUE; // udp proxy cancel
     if (ss_pid != 0) {
         kill(ss_pid, SIGKILL);
         log_info("Kill shadowsocks process");
@@ -116,7 +117,7 @@ void get_sub_exit() { // catch child process die
             error_exit();
         }
     }
-    exited = 1;
+    exited = TRUE;
 }
 
 char** load_plugin_env(sip003 *service) { // load plugin's environment variable

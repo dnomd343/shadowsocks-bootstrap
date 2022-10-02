@@ -7,18 +7,18 @@
 
 void init_info(bootstrap *info);
 void dump_info(bootstrap *info);
-char** add_extra_opts(char **opts, char *extra_opts_str);
 void json_decode(char *json_content, bootstrap *info);
+char** add_extra_opts(char **opts, char *extra_opts_str);
 int add_field(char *field, char **target, char ***arg, char ***arg_limit);
 
 void init_info(bootstrap *info) {
-    info->is_udp_proxy = 1; // enabled udp proxy
+    info->is_udp_proxy = TRUE; // enabled udp proxy
     info->server_addr = info->client_addr = NULL;
     info->server_port = info->client_port = NULL;
     info->password = NULL;
     info->method = NULL;
     info->timeout = NULL;
-    info->fastopen = 0;
+    info->fastopen = FALSE;
     info->plugin = NULL;
     info->plugin_opts = NULL;
     info->shadowsocks = NULL;
@@ -89,9 +89,9 @@ void json_decode(char *json_content, bootstrap *info) { // decode JSON content
                 log_fatal("`no_udp` must be bool");
             }
             if (json->valueint) { // is_udp_proxy = ~(json->valueint)
-                info->is_udp_proxy = 0;
+                info->is_udp_proxy = FALSE;
             } else {
-                info->is_udp_proxy = 1;
+                info->is_udp_proxy = TRUE;
             }
         } else if (!strcmp(json->string, "server")) { // server => server_addr
             if (!cJSON_IsString(json)) {
@@ -201,8 +201,8 @@ void json_decode(char *json_content, bootstrap *info) { // decode JSON content
 }
 
 int add_field(char *field, char **target, char ***arg, char ***arg_limit) {
-    if (strcmp(**arg, field)) { // field not match
-        return 0;
+    if (strcmp(**arg, field) != 0) { // field not match
+        return FALSE;
     }
     if (++(*arg) == *arg_limit) { // without next argument
         log_fatal("`%s` require a parameter", field);
@@ -211,7 +211,7 @@ int add_field(char *field, char **target, char ***arg, char ***arg_limit) {
         free(*target); // override target field
     }
     *target = new_string(**arg);
-    return 1;
+    return TRUE;
 }
 
 bootstrap* load_info(int argc, char **argv) { // load info from input parameters
@@ -231,9 +231,9 @@ bootstrap* load_info(int argc, char **argv) { // load info from input parameters
         if (!strcmp(*arg, "--debug")) { // skip debug flag
             continue;
         } else if (!strcmp(*arg, "--fast-open")) { // --fast-open => fastopen
-            info->fastopen = 1;
+            info->fastopen = TRUE;
         } else if (!strcmp(*arg, "--no-udp")) { // --no-udp => is_udp_proxy
-            info->is_udp_proxy = 0;
+            info->is_udp_proxy = FALSE;
         } else if (!strcmp(*arg, "-c")) { // -c => CONFIG_JSON
             if (++arg == arg_limit) {
                 log_fatal("Miss json file after `-c` flag");
