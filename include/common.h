@@ -4,7 +4,7 @@
 #define TRUE  1
 #define FALSE 0
 
-#define VERSION "1.0.1-beta"
+#define VERSION "1.0.2"
 
 #define RANDOM_PORT_START 41952
 #define RANDOM_PORT_END   65535
